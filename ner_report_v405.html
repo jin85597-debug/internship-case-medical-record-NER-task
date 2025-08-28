@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>臨床 NER 標註報告（v4.0.5）</title>
+<style>
+  :root{--bg:#ffffff;--ink:#1f2937;--muted:#64748b;--card:#f7fafc;--line:#e5e7eb;--accent:#0b5fff;--chip:#f2f4f8;}
+  html,body{background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial,'Noto Sans',sans-serif;}
+  .wrap{max-width:1280px;margin:28px auto;padding:0 18px;}
+  h1{margin:0 0 6px 0;font-size:28px;font-weight:800;}
+  .intro{color:var(--muted);margin:2px 0 14px 0}
+
+  /* 控制列 */
+  .topbar{position:sticky;top:0;background:rgba(255,255,255,.95);backdrop-filter:saturate(140%) blur(6px);
+           border-bottom:1px solid var(--line);padding:10px 0;z-index:20}
+  .panel{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .chip{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:var(--chip);border:1px solid var(--line);font-size:12px}
+  .chip input, .chip select, .chip textarea{margin:0;font-size:12px}
+  .search{background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 10px;color:var(--ink)}
+
+  /* 兩欄版面 */
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;margin-top:12px}
+  .aside{position:sticky;top:64px;align-self:start;max-height:calc(100vh - 80px);overflow:auto;padding-right:4px}
+  @media (max-width:1100px){ .layout{grid-template-columns:1fr} .aside{position:static;max-height:none} }
+
+  /* 區塊卡片 */
+  .file-block{border:1px solid var(--line);border-radius:14px;margin:16px 0;background:#fff}
+  .file-head{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .file-title{font-size:16px;font-weight:700}
+  .file-sub{color:var(--muted);font-size:12px}
+  .file-body{padding:8px 14px 14px 14px}
+
+  /* 章節與句子 */
+  details.section{margin:10px 0;border:1px solid var(--line);border-radius:10px;background:#fbfdff}
+  details>summary{cursor:pointer;padding:8px 12px;font-weight:700;color:#374151;list-style:none;border-bottom:1px solid var(--line)}
+  details>summary::-webkit-details-marker{display:none}
+  .sec-inner{padding:8px 12px}
+  details.sentence{margin:8px 0;border:1px dashed var(--line);border-radius:10px;background:var(--card)}
+  details.sentence>summary{cursor:pointer;padding:8px 10px;color:var(--muted);font-size:12px;list-style:none}
+  .sent-body{padding:8px 10px}
+
+  /* token 樣式 */
+  mark{background:#fff59d}
+  .tok{display:inline-block;margin:1px 2px;padding:2px 4px;border-radius:6px;line-height:1.9}
+  .tok.O{opacity:.85;border:1px dashed rgba(0,0,0,.18)}
+  .hide-O .tok.O{display:none}
+  .dense .tok{margin:0 1px;padding:1px 3px;line-height:1.6}
+
+  /* 右欄：Legend + 摘要 */
+  .aside-card{border:1px solid var(--line);border-radius:14px;background:#fff;margin:0 0 14px 0}
+  .aside-head{padding:12px 14px;border-bottom:1px solid var(--line);font-weight:700;display:flex;justify-content:space-between;align-items:center}
+  .aside-body{padding:10px 12px}
+
+  /* === 這裡是本版唯一重點更動：一列一個標籤 === */
+  .legend{display:flex;flex-direction:column;gap:6px}
+  .legend .chip{display:flex;width:100%;justify-content:flex-start}
+  .legend .swatch{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.25);display:inline-block}
+
+  .aside-ops{display:flex;gap:8px;margin-top:10px}
+
+  /* 摘要 */
+  .sum-file{margin-bottom:12px}
+  .sum-file > .name{font-weight:700}
+  .sum-sec{margin:8px 0 10px 0}
+  .sum-sec .sec-title{font-weight:700;color:#374151;margin:6px 0}
+  .sum-list{margin:0;padding-left:18px}
+  .sum-list li{margin:3px 0;line-height:1.6}
+  .tag-badge{display:inline-block;border:1px solid var(--line);padding:1px 6px;border-radius:999px;font-size:12px;margin-left:6px;background:#f9fafb}
+
+  /* TOC */
+  .toc{margin:14px 0 18px 0;display:flex;flex-wrap:wrap;gap:10px}
+  .toc a{text-decoration:none;color:var(--accent);font-size:13px;border:1px solid var(--line);padding:4px 8px;border-radius:8px;background:#fff}
+
+  .lab-O{background:transparent;border:1px solid rgba(0,0,0,.18);border-left:1px solid rgba(0,0,0,.18);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>臨床 NER 標註報告（v4.0.5）</h1>
+  <div class="intro">左側貼上病歷文字並渲染；右側為標籤與標註摘要。若提供 Hugging Face Token，可在前端呼叫 Inference API 套用 NER。</div>
+
+  <div class="topbar">
+    <div class="panel">
+      <label class="chip"><input type="checkbox" id="toggleO" checked/> 顯示 O</label>
+      <label class="chip"><input type="checkbox" id="denseMode"/> 緊湊模式</label>
+      <span class="chip">搜尋 <input id="q" class="search" placeholder="在 token 文字 / 檔名 / section 搜尋…"/></span>
+      <label class="chip"><input type="checkbox" id="filterSent"/> 只顯示符合搜尋的句子</label>
+    </div>
+  </div>
+<div class="layout"><div id="mainCol">
+  <details open class="file-block">
+    <summary class="file-head" style="cursor:pointer">
+      <div class="file-title">➕ 在頁面貼上病歷文字並處理</div>
+      <div class="file-sub">不需伺服器；若填 Hugging Face Token，可直接線上 NER</div>
+    </summary>
+    <div class="file-body">
+      <div class="panel" style="gap:12px;margin-bottom:8px">
+        <span class="chip">工作表名稱 <input id="inFileName" class="search" style="width:180px" value="pasted.txt"/></span>
+        <span class="chip">HF 模型 <input id="inModel" class="search" style="width:240px" value="d4data/biomedical-ner-all"/></span>
+        <span class="chip">HF Token（可選） <input id="inToken" class="search" style="width:260px" placeholder="hf_xxx"/></span>
+      </div>
+      <textarea id="inText" style="width:100%;height:180px;border:1px solid var(--line);border-radius:10px;padding:10px" placeholder="在此貼上整段病歷文字…"></textarea>
+      <div class="panel" style="margin-top:10px">
+        <span class="chip btn" id="btnPreprocess">① 只斷段+分詞（不做 NER）</span>
+        <span class="chip btn" id="btnRunNER">② 斷段+分詞+NER（需 Token）</span>
+        <span class="chip btn" id="btnClear">清除貼上結果</span>
+        <span class="chip">下載：
+          <button id="dlSegments" class="btn" disabled style="margin-left:4px">segments.jsonl</button>
+          <button id="dlTokens" class="btn" disabled>ner_token_rows.jsonl</button>
+          <button id="dlLabeled" class="btn" disabled>ner_labeled.jsonl</button>
+        </span>
+      </div>
+      <div id="inStatus" class="intro" style="margin-top:6px"></div>
+    </div>
+  </details>
+<div class="toc" id="toc"></div></div>
+  <aside class="aside">
+    <div class="aside-card">
+      <div class="aside-head">標籤
+        <span class="aside-ops">
+          <button class="chip btn" id="selAll">全選</button>
+          <button class="chip btn" id="selNone">全不選</button>
+        </span>
+      </div>
+      <div class="aside-body">
+        <div class="legend" id="legend"></div>
+      </div>
+    </div>
+
+    <div class="aside-card">
+      <div class="aside-head">標註摘要</div>
+      <div class="aside-body" id="annSummary"></div>
+    </div>
+  </aside>
+</div>
+<script>
+const $ = s=>document.querySelector(s);
+const $$ = s=>Array.from(document.querySelectorAll(s));
+function slug(s){return (s||'').toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff_-]+/g,'-').replace(/^-|-$/g,'');}
+function natKey(s){return (s+'').split(/(\d+)/).map(p=>p.match(/^\d+$/)?Number(p):p.toLowerCase());}
+function downloadText(filename, text){
+  const blob = new Blob([text], {type: 'application/json;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=filename; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+
+let DATA = {};
+let LABELS = new Set();
+const WORD_SECTIONS = new Set(["過去病史","Past_History","Past History","住院治療經過","Hospital_Course","Hospital Course"]);
+
+const CANON_SECTION = {
+  "診斷":"診斷","Diagnosis":"診斷","Impression":"診斷",
+  "主訴":"主訴","Chief_Complaint":"主訴","Chief Complaint":"主訴","CC":"主訴",
+  "過去病史":"過去病史","Past_History":"過去病史","Past History":"過去病史",
+  "Past Medical History":"過去病史","History of Present Illness":"過去病史","HPI":"過去病史",
+  "住院治療經過":"住院治療經過","Hospital_Course":"住院治療經過",
+  "Hospital Course":"住院治療經過","Hospitalization Course":"住院治療經過"
+};
+const CANON_ORDER = ["診斷","主訴","過去病史","住院治療經過"];
+function canonSec(name){ return CANON_SECTION[name] || name; }
+
+function buildCSSRules(){
+  const ents = Array.from(new Set(Array.from(LABELS).filter(l=>l!=='O').map(l=>l.replace(/^([BI]-)/,'')))).sort();
+  const total = Math.max(1, ents.length);
+  let css = "";
+  ents.forEach((ent,i)=>{
+    const hue = Math.floor(360*i/total);
+    const bbg = `hsl(${hue},85%,90%)`, bbd=`hsl(${hue},70%,35%)`;
+    const ibg = `hsl(${hue},85%,96%)`, ibd=`hsl(${hue},70%,55%)`;
+    css += `.lab-B-${ent.replace(/[^\w-]/g,'-')}{background:${bbg};border:1px solid ${bbd};border-left:3px solid ${bbd};}`;
+    css += `.lab-I-${ent.replace(/[^\w-]/g,'-')}{background:${ibg};border:1px solid ${ibd};border-left:1px solid ${ibd};}`;
+  });
+  css += `.tok.O{opacity:.85;border:1px dashed rgba(0,0,0,.18)}`;
+  return {ents, css};
+}
+function htmlEscape(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function renderLegend(){
+  const ents = Array.from(new Set(Array.from(LABELS).filter(l=>l!=='O').map(l=>l.replace(/^([BI]-)/,'')))).sort();
+  if(!ents.length){ $('#legend').innerHTML = '<span class="chip">No entities</span>'; return; }
+  $('#legend').innerHTML = ents.map((ent,idx)=>{
+    const hue = Math.floor(360*idx/Math.max(1,ents.length));
+    return `<label class="chip">
+      <input type="checkbox" class="entToggle" data-ent="${htmlEscape(ent)}" checked/>
+      <span class="swatch" style="background:hsl(${hue},85%,90%);border-color:hsl(${hue},70%,35%)"></span>
+      <span>${htmlEscape(ent)}</span>
+    </label>`;
+  }).join("");
+}
+function renderTOC(files){
+  const names = Object.keys(files).sort((a,b)=>{const ka=natKey(a), kb=natKey(b); for(let i=0;i<Math.max(ka.length,kb.length);i++){ if(ka[i]==null) return -1; if(kb[i]==null) return 1; if(ka[i]<kb[i]) return -1; if(ka[i]>kb[i]) return 1; } return 0;});
+  $('#toc').innerHTML = names.map(f=>`<a href="#file-${slug(f)}">${htmlEscape(f)}</a>`).join("");
+}
+
+function rebuildSummary(){
+  const box = $('#annSummary');
+  if(!box) return;
+  let html = '';
+
+  const orderedFiles = Object.keys(DATA).sort((a,b)=>{
+    const ka=natKey(a), kb=natKey(b);
+    for(let i=0;i<Math.max(ka.length,kb.length);i++){ if(ka[i]==null) return -1; if(kb[i]==null) return 1; if(ka[i]<kb[i]) return -1; if(ka[i]>kb[i]) return 1; }
+    return 0;
+  });
+
+  orderedFiles.forEach(file=>{
+    const sections = DATA[file] || {};
+    const buckets = {};
+    Object.keys(sections).forEach(sec=>{
+      const cs = canonSec(sec);
+      if(!buckets[cs]) buckets[cs] = [];
+      Object.keys(sections[sec]).map(x=>Number(x)).sort((a,b)=>a-b).forEach(sidx=>{
+        const toks = sections[sec][sidx] || [];
+        let cur=null; const groups=[];
+        toks.forEach(t=>{
+          const lab = String(t.label||'O');
+          if(lab==='O'){ cur=null; return; }
+          const ent = lab.replace(/^([BI]-)/,'');
+          const piece = t.text;
+          const wordJoin = WORD_SECTIONS.has(sec) ? '' : ' ';
+          if(lab.startsWith('B-') || !cur || cur.ent!==ent){ cur={ent,text:piece}; groups.push(cur); }
+          else { cur.text += wordJoin + piece; }
+        });
+        groups.forEach(g=> buckets[cs].push({ent:g.ent, text:g.text}));
+      });
+    });
+
+    const allCanon = new Set(Object.keys(buckets));
+    const seq = CANON_ORDER.concat(Array.from(allCanon).filter(x=>!CANON_ORDER.includes(x)).sort());
+
+    let total = 0; seq.forEach(cs=> total += (buckets[cs]||[]).length);
+    html += `<div class="sum-file"><div class="name">${htmlEscape(file)} · 標註片段 <b>${total}</b></div>`;
+    seq.forEach(cs=>{
+      const arr = buckets[cs]||[];
+      if(!arr.length) return;
+      html += `<div class="sum-sec"><div class="sec-title">[${htmlEscape(cs)}]</div><ul class="sum-list">`;
+      arr.forEach(r=>{
+        html += `<li>${htmlEscape(r.text)}<span class="tag-badge">${htmlEscape(r.ent)}</span></li>`;
+      });
+      html += `</ul></div>`;
+    });
+    html += `</div>`;
+  });
+
+  box.innerHTML = html || '<div class="intro">（尚無標註可摘要）</div>';
+}
+
+function rebuildPage(){
+  const styleId = 'dyn-label-css';
+  let st = document.getElementById(styleId);
+  if(!st){ st = document.createElement('style'); st.id=styleId; document.head.appendChild(st); }
+  st.textContent = buildCSSRules().css;
+
+  renderLegend();
+  renderTOC(DATA);
+
+  $$('.file-block.rendered').forEach(e=>e.remove());
+
+  const orderedFiles = Object.keys(DATA).sort((a,b)=>{const ka=natKey(a), kb=natKey(b); for(let i=0;i<Math.max(ka.length,kb.length);i++){ if(ka[i]==null) return -1; if(kb[i]==null) return 1; if(ka[i]<kb[i]) return -1; if(ka[i]>kb[i]) return 1; } return 0;});
+
+  orderedFiles.forEach(file=>{
+    const sections = DATA[file];
+    let tokCnt = 0, secNames = Object.keys(sections);
+    Object.values(sections).forEach(sentmap=>Object.values(sentmap).forEach(toks=>tokCnt+=toks.length));
+    const block = document.createElement('div');
+    block.className = 'file-block rendered'; block.id = `file-${slug(file)}`;
+    block.innerHTML = `
+      <div class="file-head"><div class="file-title">${htmlEscape(file)}</div>
+        <div class="file-sub">tokens: <b>${tokCnt}</b> · sections: <b>${secNames.length}</b></div>
+      </div>
+      <div class="file-body"></div>`;
+    const body = block.querySelector('.file-body');
+
+    const orderedSecs = (()=>{
+      const seen=new Set(); const out=[];
+      ["診斷","主訴","過去病史","住院治療經過","Diagnosis","Chief_Complaint","Chief Complaint","Past_History","Past History","Hospital_Course","Hospital Course"]
+        .forEach(n=>{ if(sections[n] && !seen.has(n)){ out.push(n); seen.add(n);} });
+      Object.keys(sections).sort().forEach(n=>{ if(!seen.has(n)){ out.push(n); seen.add(n);} });
+      return out;
+    })();
+
+    orderedSecs.forEach(sec=>{
+      const secEl = document.createElement('details');
+      secEl.className='section'; secEl.open=true;
+      secEl.innerHTML = `<summary>${htmlEscape(sec)}</summary><div class="sec-inner"></div>`;
+      const inner = secEl.querySelector('.sec-inner');
+      const sentIdx = Object.keys(sections[sec]).map(x=>Number(x)).sort((a,b)=>a-b);
+      sentIdx.forEach(sidx=>{
+        const toks = sections[sec][sidx];
+        const sent = document.createElement('details');
+        sent.className='sentence'; sent.open=true;
+        sent.innerHTML = `<summary>tokens: ${toks.length}</summary><div class="sent-body"></div>`;
+        const sbody = sent.querySelector('.sent-body');
+        toks.forEach(rec=>{
+          const lab = String(rec.label||'O');
+          const ent = lab==='O'?'O':lab.replace(/^([BI]-)/,'');
+          LABELS.add(lab);
+          const labCls = lab==='O'?'O':`lab-${lab.replace(/[^\w-]/g,'-')}`;
+          const span = document.createElement('span');
+          span.className = `tok ${labCls} ent-${ent.replace(/[^\w-]/g,'-')} ${lab==='O'?'O':''}`;
+          span.dataset.ent = ent; span.dataset.label = lab;
+          span.innerHTML = htmlEscape(rec.text).replace(/ /g,'&nbsp;');
+          sbody.appendChild(span);
+        });
+        inner.appendChild(sent);
+      });
+      body.appendChild(secEl);
+    });
+    document.querySelector('#mainCol').appendChild(block);
+  });
+
+  rebuildSummary();
+  bindFilters();
+}
+
+function bindFilters(){
+  const toggleO = $('#toggleO'), dense = $('#denseMode'), q=$('#q'), filterSent=$('#filterSent');
+  function apply(){
+    document.body.classList.toggle('hide-O', !toggleO.checked);
+    document.body.classList.toggle('dense', dense.checked);
+
+    const enabled = new Set($$('.entToggle').filter(t=>t.checked).map(t=>t.dataset.ent));
+    $$('.tok').forEach(el=>{
+      const ent = el.dataset.ent;
+      if (ent === 'O') return;
+      if (enabled.size === 0) {
+        el.style.display = 'inline-block';
+        el.style.background = 'transparent';
+        el.style.border = 'none';
+        return;
+      }
+      if (enabled.has(ent)) {
+        el.style.display = 'inline-block';
+        el.style.background = '';
+        el.style.border = '';
+      } else {
+        el.style.display = 'inline-block';
+        el.style.background = 'transparent';
+        el.style.border = 'none';
+      }
+    });
+
+    const reStr = q.value.trim(); let re=null;
+    try{ re = reStr? new RegExp(reStr,'i'):null; }catch(e){ re=null; }
+    $$('.tok mark').forEach(m=>{ const p=m.parentNode; p.replaceChild(document.createTextNode(m.textContent), m); p.normalize(); });
+    $$('.sentence').forEach(sent=>{
+      let match = !re;
+      if(re){
+        const file = sent.closest('.file-block')?.querySelector('.file-title')?.textContent || '';
+        const sec  = sent.closest('.section')?.querySelector('summary')?.textContent || '';
+        if(re.test(file) || re.test(sec)) match = true;
+        Array.from(sent.querySelectorAll('.tok')).forEach(t=>{
+          const txt = t.textContent.replace(/\u00A0/g,' ');
+          if(re.test(txt)){ match = true; t.innerHTML = t.innerHTML.replace(/([^<]*)/, (m)=> m.replace(re, s=>`<mark>${s}</mark>`)); }
+        });
+      }
+      sent.style.display = (filterSent.checked && !match)?'none':'';
+    });
+  }
+  toggleO.onchange = dense.onchange = q.oninput = filterSent.onchange = apply;
+  $$('.entToggle').forEach(t=>t.onchange = apply);
+  $('#selAll')?.addEventListener('click', ()=>{ $$('.entToggle').forEach(t=>t.checked=true); apply(); });
+  $('#selNone')?.addEventListener('click', ()=>{ $$('.entToggle').forEach(t=>t.checked=false); apply(); });
+  apply();
+}
+
+window.__INIT_DATA__ = {files: {}, labels: ["O"]};
+(function initFromEmbedded(){
+  const files = window.__INIT_DATA__.files || {};
+  const labels = window.__INIT_DATA__.labels || [];
+  DATA = files;
+  LABELS = new Set(labels.length?labels:['O']);
+  rebuildPage();
+})();
+
+const SECTION_TOKENS = [
+  "診斷","主訴","過去病史","住院治療經過",
+  "Diagnosis","Impression","Chief Complaint","CC",
+  "Past Medical History","Past History","History of Present Illness","HPI",
+  "Hospital Course","Hospitalization Course"
+];
+const SECTION_PATTERNS = [
+  [/^\s*(診斷\s*[:：]|Diagnosis\s*[:：]|Impression\s*[:：])/i,"診斷"],
+  [/^\s*(主訴\s*[:：]|Chief\s*Complaint\s*[:：]|CC\s*[:：]?)/i,"主訴"],
+  [/^\s*(過去病史|既往史|Past\s*(Medical\s*)?History|History\s*of\s*Present\s*Illness|HPI)\s*[:：]?/i,"過去病史"],
+  [/^\s*(住院治療經過|住院經過|住院過程|Hospital\s*Course|Hospitalization\s*Course)\s*[:：]?/i,"住院治療經過"],
+];
+const SENT_END = new Set(['.','。','．','!','?','！','？']);
+function iterLines(raw){ const out=[]; let i=0; while(i<raw.length){ const j=raw.indexOf('\n', i); const end = j<0? raw.length: j+1; out.push([i,end,raw.slice(i,end)]); i=end; } return out; }
+function cleanCrossSection(text){
+  if(!text) return text;
+  const stripped = text.trim();
+  for(const tok of SECTION_TOKENS){
+    if(new RegExp(`^${tok.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\s*[:：]\s*$`,'i').test(stripped)) return "";
+  }
+  const pattern = new RegExp(`(?:\n|^)\s*(?:${SECTION_TOKENS.map(t=>t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')})\s*[:：]\s*`, 'i');
+  const m = text.match(pattern);
+  if(m) return text.slice(0, m.index).replace(/\s+$/,'');
+  return text.replace(/\s+$/,'');
+}
+function findSections(raw){
+  const hits=[];
+  iterLines(raw).forEach(([i,j,line])=>{
+    for(const [pat,norm] of SECTION_PATTERNS){
+      const m = line.match(pat);
+      if(m){
+        let k = m.index + m[0].length;
+        while(k<line.length && /[ \t]/.test(line[k])) k++;
+        hits.push([norm, i + m.index, i + k]);
+        break;
+      }
+    }
+  });
+  const uniq=[]; const seen=new Set();
+  hits.sort((a,b)=>a[1]-b[1]);
+  for(const h of hits){ if(!seen.has(h[0])){ uniq.push(h); seen.add(h[0]); } }
+  return uniq;
+}
+function sliceBlocks(raw, labels){
+  const spans={};
+  labels.forEach((t,idx)=>{
+    const [lab, labelStart, contentStart] = t;
+    const next = labels[idx+1]? labels[idx+1][1]: raw.length;
+    spans[lab] = [contentStart, next];
+  });
+  return spans;
+}
+function isAmPmFirstDot(text, pos){
+  const prev = pos-1>=0? text[pos-1].toLowerCase():'';
+  const n1 = pos+1<text.length? text[pos+1].toLowerCase():'';
+  const n2 = pos+2<text.length? text[pos+2]:'';
+  return (prev==='a'||prev==='p') && n1==='m' && n2==='.';
+}
+function isNoAbbrev(text, pos){
+  const left = text.slice(Math.max(0,pos-5), pos+1);
+  return /\bno\.\s*$/i.test(left);
+}
+function splitOnPeriods(raw, s, e){
+  const text = raw.slice(s,e); const cuts=[]; let last=0;
+  let i=0;
+  function at(k){ return (k>=0 && k<text.length)? text[k]:''; }
+  while(i<text.length){
+    const ch = text[i];
+    if(SENT_END.has(ch)){
+      if((ch==='.'||ch==='．') && /\d/.test(at(i-1))){
+        let k=i+1; while(k<text.length && /[ \t\r\n]/.test(text[k])) k++;
+        if(k<text.length && /\d/.test(text[k])){ i++; continue; }
+      }
+      if(ch==='.' && isAmPmFirstDot(text,i)){ i++; continue; }
+      if(ch==='.' && isNoAbbrev(text,i)){ i++; continue; }
+      const segEnd = i+1; cuts.push([last, segEnd]); last = segEnd;
+      while(last<text.length && /[ \t\r\n]/.test(text[last])) last++;
+    }
+    i++;
+  }
+  if(last<text.length) cuts.push([last, text.length]);
+  return cuts.map(([a,b])=>[s+a, s+b]);
+}
+function mergeTinyForward(raw, spans, tiny){
+  if(!spans.length) return spans;
+  const out=[]; let i=0;
+  while(i<spans.length){
+    let [a,b]=spans[i]; const frag = raw.slice(a,b); const endCh = frag.slice(-1);
+    if((b-a)<=tiny && !SENT_END.has(endCh)){
+      let j=i+1;
+      while(j<spans.length){ const [a2,b2]=spans[j]; const frag2 = raw.slice(a2,b2); const end2 = frag2.slice(-1); b=b2; j++; if(SENT_END.has(end2)) break; }
+      out.push([a,b]); i=j;
+    }else{ out.push([a,b]); i++; }
+  }
+  return out;
+}
+function mergeEnumerators(raw, spans){
+  const FULL = /^\s*\d+\.\s*$/;
+  const TAILEND = /\d+\.\s*$/;
+  const TAILSTART = /^\s*\(?\d+\)?[.)]\s+/;
+  const out=[]; let i=0;
+  while(i<spans.length){
+    let [a,b]=spans[i]; const frag = raw.slice(a,b);
+    if(FULL.test(frag.trim()) && i+1<spans.length){ const [a2,b2]=spans[i+1]; out.push([a,b2]); i+=2; continue; }
+    if(TAILEND.test(frag) && i+1<spans.length){ const [a2,b2]=spans[i+1]; out.push([a,b2]); i+=2; continue; }
+    if(i+1<spans.length){
+      const [a2,b2]=spans[i+1]; const nxt = raw.slice(a2,b2);
+      if(TAILSTART.test(nxt) && (b-a)<=12){ out.push([a,b2]); i+=2; continue; }
+    }
+    out.push([a,b]); i++;
+  }
+  return out;
+}
+function cutDiagnosis(raw, s, e){
+  const BOUND = /(#+|- ?s\/p)/ig;
+  const out=[];
+  iterLines(raw.slice(s,e)).forEach(([li,lj,line])=>{
+    if(!line.trim()) return;
+    const starts = Array.from(line.matchAll(BOUND)).map(m=>m.index);
+    if(!starts.length){ out.push([s+li, s+lj]); return; }
+    if(starts[0]>0 && line.slice(0,starts[0]).trim()){ out.push([s+li, s+li+starts[0]]); }
+    starts.forEach((rs,idx)=>{
+      const startAbs = s + li + rs;
+      const endAbs = s + li + (starts[idx+1]!=null? starts[idx+1]: line.length);
+      if(raw.slice(startAbs,endAbs).trim()){ out.push([startAbs, endAbs]); }
+    });
+  });
+  const cleaned=[];
+  out.forEach(([a,b])=>{ const frag = raw.slice(a,b); const c = cleanCrossSection(frag); if(c) cleaned.push([a, a+c.length]); });
+  return cleaned;
+}
+function cutBlock(raw, s, e, name){
+  if(name==="診斷") return cutDiagnosis(raw,s,e);
+  if(name==="主訴"){
+    let spans = splitOnPeriods(raw,s,e);
+    spans = mergeTinyForward(raw, spans, 18);
+    spans = mergeEnumerators(raw, spans);
+    return spans;
+  }
+  if(name==="過去病史" || name==="住院治療經過"){
+    let acc=[];
+    iterLines(raw.slice(s,e)).forEach(([li,lj,line])=>{
+      if(line.trim()){ acc = acc.concat(splitOnPeriods(raw, s+li, s+lj)); }
+    });
+    acc = mergeTinyForward(raw, acc, 28);
+    acc = mergeEnumerators(raw, acc);
+    return acc;
+  }
+  let spans = splitOnPeriods(raw,s,e);
+  spans = mergeTinyForward(raw, spans, 24);
+  spans = mergeEnumerators(raw, spans);
+  return spans;
+}
+function computeOffsets(sentence, token, startPos){
+  const idx = sentence.indexOf(token, startPos);
+  if(idx>=0) return [idx, idx+token.length];
+  const ns = sentence.replace(/\s+/g,' ');
+  const nt = token.replace(/\s+/g,' ');
+  const j = ns.indexOf(nt);
+  if(j>=0) return [j, j+nt.length];
+  return [startPos, startPos+token.length];
+}
+function splitOutsideParens(text){
+  let depth=0, cur='', toks=[];
+  const flush=()=>{ const t = cur.trim(); if(t) toks.push(t); cur=''; };
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(ch==='('){ depth++; cur+=ch; continue; }
+    if(ch===')'){ depth=Math.max(depth-1,0); cur+=ch; continue; }
+    if(depth===0){
+      if(text.slice(i,i+5).toLowerCase()===' and '){ flush(); toks.push('and'); i+=4; continue; }
+      if(ch===',' || ch===';'){ flush(); continue; }
+    }
+    cur+=ch;
+  }
+  flush();
+  return toks;
+}
+function tokenizeSentence(file, section, sidx, text){
+  let toks=[];
+  if(WORD_SECTIONS.has(section)){
+    let i=0; const n=text.length;
+    while(i<n){
+      let j=i; while(j<n && !/ /.test(text[j])) j++;
+      while(j<n && text[j]===' ') j++;
+      const token = text.slice(i,j);
+      if(token) toks.push(token);
+      i=j;
+    }
+  }else{
+    toks = splitOutsideParens(text);
+  }
+  const recs=[]; let cursor=0;
+  toks.forEach((t, k)=>{
+    const [s,e] = computeOffsets(text, t, cursor);
+    recs.push({
+      id: `${file}:${section}:${sidx}:${k}`,
+      meta: {file, section, source_span:[null,null], sentence_index:sidx, token_index:k},
+      text: t, start: s, end: e, label: "O"
+    });
+    cursor = e;
+  });
+  return recs;
+}
+function preprocessRawToData(raw, fileLabel){
+  const labels = findSections(raw);
+  const blocks = labels.length? sliceBlocks(raw, labels): {};
+  let segments=[];
+  if(!labels.length){
+    iterLines(raw).forEach(([i,j,t])=>{
+      if(t.trim()){
+        const cleaned = cleanCrossSection(raw.slice(i,j));
+        if(cleaned) segments.push({file:fileLabel, section:"全文", start:i, end:i+cleaned.length, text:c});
+      }
+    });
+  }else{
+    Object.entries(blocks).forEach(([lab,[bs,be]])=>{
+      cutBlock(raw, bs, be, lab).forEach(([a,b])=>{
+        const frag = raw.slice(a,b); const c = cleanCrossSection(frag);
+        if(c) segments.push({file:fileLabel, section:lab, start:a, end:a+c.length, text:c});
+      });
+    });
+  }
+  const buckets = {};
+  segments.forEach(seg=>{
+    const key = seg.file + "||" + seg.section;
+    if(!buckets[key]) buckets[key]=[];
+    buckets[key].push(seg.text);
+  });
+  const files = {};
+  const tokenRows = [];
+  Object.entries(buckets).forEach(([key, arr])=>{
+    const [file, section] = key.split("||");
+    arr.forEach((sent,i)=>{
+      const recs = tokenizeSentence(file, section, i, sent);
+      if(!files[file]) files[file]={};
+      if(!files[file][section]) files[file][section]={};
+      files[file][section][i] = recs.map(r=>({text:r.text, start:r.start, end:r.end, label:r.label, meta:r.meta}));
+      recs.forEach(r=> tokenRows.push(r));
+    });
+  });
+  return {files, segments, tokenRows};
+}
+async function runNEROnFiles(files, model, token){
+  async function inferText(text){
+    const resp = await fetch(`https://api-inference.huggingface.co/models/${encodeURIComponent(model)}`, {
+      method: 'POST',
+      headers: {'Authorization': `Bearer ${token}`, 'Content-Type':'application/json'},
+      body: JSON.stringify({inputs: text, parameters: {aggregation_strategy: "simple"}})
+    });
+    if(!resp.ok) throw new Error(`HF API ${resp.status}`);
+    return await resp.json();
+  }
+  function assignBIO(tokens, spans){
+    const labels = new Array(tokens.length).fill('O');
+    const best = new Array(tokens.length).fill(0);
+    spans.forEach(p=>{
+      const s=+p.start, e=+p.end, lab = String(p.entity_group||p.entity||'ENT');
+      const idxs=[];
+      tokens.forEach((t,i)=>{
+        const ts=+t.start, te=+t.end;
+        const ov = Math.max(0, Math.min(te,e) - Math.max(ts,s));
+        if(ov>0) idxs.push([i,ov]);
+      });
+      if(!idxs.length) return;
+      idxs.sort((a,b)=>a[0]-b[0]);
+      idxs.forEach(([i,ov],j)=>{
+        const tag = (j===0? 'B-':'I-') + lab;
+        if(ov>best[i]){ labels[i]=tag; best[i]=ov; }
+      });
+    });
+    return labels;
+  }
+  for(const file of Object.keys(files)){
+    for(const section of Object.keys(files[file])){
+      for(const sidx of Object.keys(files[file][section]).map(x=>Number(x)).sort((a,b)=>a-b)){
+        const toks = files[file][section][sidx];
+        const sentText = WORD_SECTIONS.has(section)? toks.map(t=>t.text).join("") : toks.map(t=>t.text).join(" ");
+        const ents = await inferText(sentText);
+        const labs = assignBIO(toks, ents);
+        toks.forEach((t,i)=>{ t.label = labs[i]; LABELS.add(labs[i]); });
+      }
+    }
+  }
+}
+function enableDownloads(obj){
+  $('#dlSegments').disabled = !obj.segments;
+  $('#dlTokens').disabled = !obj.tokenRows;
+  $('#dlLabeled').disabled = !obj.labeled;
+  if(obj.segments){ $('#dlSegments').onclick = ()=>downloadText('segments.jsonl', obj.segments.map(o=>JSON.stringify(o)).join('\n')); }
+  if(obj.tokenRows){ $('#dlTokens').onclick = ()=>downloadText('ner_token_rows.jsonl', obj.tokenRows.map(o=>JSON.stringify(o)).join('\n')); }
+  if(obj.labeled){ $('#dlLabeled').onclick = ()=>downloadText('ner_labeled.jsonl', obj.labeled.map(o=>JSON.stringify(o)).join('\n')); }
+}
+$('#btnPreprocess').addEventListener('click', ()=>{
+  const txt = $('#inText').value || '';
+  const fname = $('#inFileName').value || 'pasted.txt';
+  if(!txt.trim()){ $('#inStatus').textContent = '請先貼上文字'; return; }
+  $('#inStatus').textContent = '處理中（斷段 + 分詞）…';
+  const {files, segments, tokenRows} = preprocessRawToData(txt, fname);
+  DATA[fname] = files[fname];
+  LABELS.add('O');
+  rebuildPage();
+  $('#inStatus').textContent = `完成：句子 ${Object.values(files[fname]).reduce((a,sm)=>a+Object.keys(sm).length,0)}，tokens ${Object.values(files[fname]).reduce((a,sm)=>a+Object.values(sm).reduce((x,t)=>x+t.length,0),0)}（未做 NER）`;
+  enableDownloads({segments, tokenRows, labeled: tokenRows});
+});
+$('#btnRunNER').addEventListener('click', async ()=>{
+  const txt = $('#inText').value || '';
+  const fname = $('#inFileName').value || 'pasted.txt';
+  const model = $('#inModel').value || 'd4data/biomedical-ner-all';
+  const token = $('#inToken').value.trim();
+  if(!txt.trim()){ $('#inStatus').textContent = '請先貼上文字'; return; }
+  if(!token){ $('#inStatus').textContent = '請填寫 Hugging Face Access Token（或改按「只斷段+分詞」）'; return; }
+  $('#inStatus').textContent = '處理中（斷段 + 分詞 + NER 推論）…';
+  const {files, segments, tokenRows} = preprocessRawToData(txt, fname);
+  DATA[fname] = files[fname];
+  LABELS = new Set(['O']);
+  try{
+    await runNEROnFiles(DATA, model, token);
+    const labeledRows=[];
+    Object.keys(DATA).forEach(file=>{
+      Object.keys(DATA[file]).forEach(sec=>{
+        Object.keys(DATA[file][sec]).forEach(sidx=>{
+          DATA[file][sec][sidx].forEach((t,i)=>{
+            labeledRows.push({
+              id: `${file}:${sec}:${sidx}:${i}`,
+              meta: {file, section:sec, source_span:[null,null], sentence_index:+sidx, token_index:i},
+              text: t.text, start: t.start, end: t.end, label: t.label
+            });
+          });
+        });
+      });
+    });
+    rebuildPage();
+    $('#inStatus').textContent = '完成：已套用 NER 標註並更新頁面';
+    enableDownloads({segments, tokenRows, labeled: labeledRows});
+  }catch(err){
+    console.error(err);
+    $('#inStatus').textContent = '呼叫 Hugging Face Inference API 失敗：' + err.message;
+  }
+});
+$('#btnClear').addEventListener('click', ()=>{
+  $('#inText').value=''; $('#inStatus').textContent='';
+  $('#dlSegments').disabled = $('#dlTokens').disabled = $('#dlLabeled').disabled = true;
+});
+bindFilters();
+</script>
+
+</div></body></html>
