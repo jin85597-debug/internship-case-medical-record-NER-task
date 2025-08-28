@@ -496,4 +496,131 @@ details.sentence>summary{cursor:pointer;padding:8px 10px;color:var(--muted);font
 
 改容器寬度與內距：修改 .wrap 的 max-width 或 padding。
 
+# HTML 輸入模板
+```php_template
+HTML_INPUT = """
+  <div class="layout">
+    <div id="mainCol">
+      <details open class="file-block">
+        <summary class="file-head" style="cursor:pointer">
+          <div class="file-title">➕ 貼上病歷文字並處理</div>
+          <div class="file-sub">離線可用；填 Hugging Face Token 可直接 NER</div>
+        </summary>
+        <div class="file-body">
+          <div class="panel" style="margin-bottom:8px">
+            <span class="chip">工作表名稱 <input id="inFileName" class="search" style="width:180px" value="pasted.txt"/></span>
+            <span class="chip">HF 模型 <input id="inModel" class="search" style="width:240px" value="d4data/biomedical-ner-all"/></span>
+            <span class="chip">HF Token <input id="inToken" class="search" style="width:260px" placeholder="hf_xxx"/></span>
+          </div>
+          <textarea id="inText" class="ta" placeholder="在此貼上整段病歷文字…"></textarea>
+          <div class="panel" style="margin-top:10px">
+            <span class="chip btn" id="btnPreprocess">① 只斷段 + 分詞</span>
+            <span class="chip btn" id="btnRunNER">② 斷段 + 分詞 + NER</span>
+            <span class="chip btn" id="btnClear">清除貼上結果</span>
+            <span class="chip">下載：
+              <button type="button" id="dlSegments" class="btn" disabled style="margin-left:4px">segments.jsonl</button>
+              <button type="button" id="dlTokens" class="btn" disabled>ner_token_rows.jsonl</button>
+              <button type="button" id="dlLabeled" class="btn" disabled>ner_labeled.jsonl</button>
+            </span>
+          </div>
+          <div id="inStatus" class="intro" style="margin-top:6px"></div>
+        </div>
+      </details>
+      <div class="toc" id="toc"></div>
+    </div>
+
+    <aside class="aside">
+      <div class="aside-card">
+        <div class="aside-head">標籤
+          <span>
+            <button type="button" class="chip btn" id="selAll">全選</button>
+            <button type="button" class="chip btn" id="selNone">全不選</button>
+          </span>
+        </div>
+        <div class="aside-body"><div class="legend" id="legend"></div></div>
+      </div>
+
+      <div class="aside-card">
+        <div class="aside-head">標註摘要</div>
+        <div class="aside-body" id="annSummary"></div>
+      </div>
+    </aside>
+  </div>
+"""
+```
+## 說明:
+```php-template
+  <div class="layout">
+    <div id="mainCol">
+```
+### 目的：建立輸入模板的主容器，包含左側主欄與右側 aside 區塊。
+
+`<div class="layout">`:整體排版容器，負責左右欄配置
+
+`<div id="mainCol">`:主欄容器，包含輸入卡片與標註類型導覽區
+
+### 如果要改：
+    
+改排版方式：調整 .layout 的 display 或 flex 設定
+
+改主欄寬度：修改 #mainCol 的 CSS
+
+改欄位順序：調整 layout 下的子元素順序
+
+## 說明:
+```php-template
+ <details open class="file-block">
+        <summary class="file-head" style="cursor:pointer">
+          <div class="file-title">➕ 貼上病歷文字並處理</div>
+          <div class="file-sub">離線可用；填 Hugging Face Token 可直接 NER</div>
+        </summary>
+```
+### 目的:建立輸入卡片的標題區塊，顯示操作提示與模型使用說明。
+
+`<details open class="file-block">`：輸入卡片容器，預設展開
+
+`<summary class="file-head" style="cursor:pointer">`：卡片標題列，游標可點擊展開/收合
+
+`<div class="file-title">`：主標題文字，顯示「➕ 貼上病歷文字並處理」
+
+`<div class="file-sub">`：副標題文字，顯示「離線可用；填 Hugging Face Token 可直接 NER」
+
+###如果要改：
+
+改展開狀態：移除 open 屬性
+
+改標題文字：修改 .file-title 的內容
+
+改副標題文字：修改 .file-sub 的內容
+
+改展開樣式：調整 .file-head 的 cursor 或 summary 樣式
+
+改卡片命名：變更 class="file-block" 以符合語意
+
+## 說明:
+```php_template
+ <div class="file-body">
+          <div class="panel" style="margin-bottom:8px">
+            <span class="chip">工作表名稱 <input id="inFileName" class="search" style="width:180px" value="pasted.txt"/></span>
+            <span class="chip">HF 模型 <input id="inModel" class="search" style="width:240px" value="d4data/biomedical-ner-all"/></span>
+            <span class="chip">HF Token <input id="inToken" class="search" style="width:260px" placeholder="hf_xxx"/></span>
+          </div>
+```
+### 目的:建立模型設定區塊，提供使用者輸入檔名、指定 Hugging Face 模型與 Token。
+
+`<div class="file-body">`：輸入卡片內容容器
+
+`<div class="panel" style="margin-bottom:8px">`：輸入欄容器，下方間距 8px
+
+`<span class="chip">`：欄位包裝單元，使用 chip 樣式
+
+`<input id="inFileName" class="search" style="width:180px" value="pasted.txt"/>`：檔名輸入框，預設值 pasted.txt
+
+`<input id="inModel" class="search" style="width:240px" value="d4data/biomedical-ner-all"/>`：模型名稱輸入框，預設值 d4data/biomedical-ner-all
+
+`<input id="inToken" class="search" style="width:260px" placeholder="hf_xxx"/>`：Token 輸入框，提示文字 hf_xxx
+
+
+
+
 
