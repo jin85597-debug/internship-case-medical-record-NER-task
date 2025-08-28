@@ -251,9 +251,13 @@ HTML_HEAD = """<!doctype html>
 ```
 
 ###目的：建立主內容與側欄的兩欄排版，並在窄螢幕下自動轉為單欄，提升閱讀性與響應式體驗。
+
 `.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;margin-top:12px}`：使用 CSS Grid 建立兩欄結構，左側主欄自動撐滿，右側側欄固定寬度 340px，欄間距 16px，與上方區塊間距 12px。
+
 `.aside{position:sticky;top:64px;align-self:start;max-height:calc(100vh - 80px);overflow:auto;padding:4px 0;padding-right:4px}`：側欄 sticky 固定在視窗頂部 64px 處，並限制最大高度為視窗高度減 80px，內容可滾動，內距設定避免捲軸壓線。
+
 `@media (max-width:1100px){ .layout{grid-template-columns:1fr} .aside{position:static;max-height:none;overflow:visible;padding:0} }`：當螢幕寬度小於 1100px 時，自動改為單欄排版，側欄取消 sticky 並移除高度限制與捲動，改為完整顯示。
+
 ###如果要改：
 改側欄寬度：調整 .layout 的 grid-template-columns。
 改 sticky 高度：調整 .aside 的 top 值。
