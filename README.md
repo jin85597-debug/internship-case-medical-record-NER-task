@@ -1,5 +1,7 @@
 # 臨床 NER HTML 報告產生器
 一款輕量級的 Python CLI 工具，用於生成獨立的雙欄式 HTML 報告頁面。使用者可在瀏覽器中貼上醫療文本，完成段落拆分、分詞，並可呼叫 Hugging Face 推論 API 進行實體識別（NER）。
+<img width="1308" height="674" alt="image" src="https://github.com/user-attachments/assets/d37e56d4-ecdd-4db6-8ae0-0d3695203a26" />
+
 # 主要功能
 單檔 HTML：城市碼執行後直接以瀏覽器開啟.HTML即可使用，不需額外伺服器。
 
