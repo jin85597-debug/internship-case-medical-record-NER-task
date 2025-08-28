@@ -312,3 +312,33 @@ HTML_HEAD = """<!doctype html>
 
 改間距：調整 .file-body 的 padding。
 
+## 說明:
+```php-template
+/* 區塊樣式 */
+details.section{margin:24px 0;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.sec-inner{padding:16px 18px}
+details.section[open]{border-color:var(--accent)}
+details.section summary{cursor:pointer;list-style:none;padding:14px 18px;font-weight:600;font-size:15px;border-bottom:1px solid var(--line)}
+details.section summary::-webkit-details-marker{display:none}
+```
+### 目的：建立可展開的區塊樣式，用於分段呈現內容，提升可讀性與互動性。
+
+`details.section{margin:24px 0;border:1px solid var(--line);border-radius:12px;background:var(--card)}`：區塊容器，使用 details 元素可展開/收合，邊框、圓角、背景色使用全域變數。
+
+`.sec-inner{padding:16px 18px}`：內部內容區，內距設定為上下 16px、左右 18px。
+
+`details.section[open]{border-color:var(--accent)}`：展開狀態時，邊框顏色改為強調色 accent。
+
+`details.section summary{cursor:pointer;list-style:none;padding:14px 18px;font-weight:600;font-size:15px;border-bottom:1px solid var(--line)}`：標題列樣式，設定游標、字級、粗細、內距與底線。
+
+`details.section summary::-webkit-details-marker{display:none}`：隱藏預設的展開箭頭，改用自訂樣式。
+
+### 如果要改：
+
+改圓角：調整 section 的 border-radius。
+
+改展開顏色：修改 [open] 狀態的 border-color。
+
+改標題字級：調整 summary 的 font-size。
+
+改展開箭頭樣式：自行加入 ::after 或 SVG 元素。
