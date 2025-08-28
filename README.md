@@ -45,15 +45,3 @@
 - HTML5、CSS3、現代 JavaScript (ES6+)
 - Hugging Face 推論 API（瀏覽器端 fetch，需輸入 HF Token）
 
-# 安裝
-
-確認系統已安裝 Python 3.8+
-
-python3 --version
-
-下載程式碼
-
-git clone 
-cd repo
-
-不需額外安裝套件，程式僅使用 Python 標準函式庫。
