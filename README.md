@@ -24,8 +24,10 @@
 - Hugging Face 推論 API（瀏覽器端 fetch，需輸入 HF Token）
 
 # 匯入模組
+```
 import argparse, json, html, re
 from typing import Dict, List
+```
 
 說明：
 這裡匯入了程式需要用到的標準模組。
@@ -45,10 +47,10 @@ typing 中的 Dict、List：型別標註用，幫助程式可讀性，說明函�
 
 # 後端：HTML 產出的小工具
 
-函式 esc(s: str) -> str
-定義：
+```python
 def esc(s: str) -> str:
-return html.escape(str(s), quote=False)
+    return html.escape(str(s), quote=False)
+```
 
 說明：
 這個函式的目的是將輸入的文字做 HTML 字元轉義，避免被當成 HTML 標籤或導致 XSS。
@@ -62,11 +64,10 @@ quote=False：代表不轉換單引號與雙引號。
 如果要改：
 若想連引號也轉換，將 quote=False 改成 True。若想加入額外過濾，例如單引號變成 '，需要自己再加 replace。
 
-函式 cls_safe(s: str) -> str
-定義：
+```python
 def cls_safe(s: str) -> str:
 return re.sub(r"[^a-zA-Z0-9_-]+", "-", s)
-
+```
 說明：
 這個函式會把輸入的字串轉成安全可用於 CSS class 名稱的形式。
 
@@ -76,9 +77,7 @@ return re.sub(r"[^a-zA-Z0-9_-]+", "-", s)
 
 如果要改：
 如果需要支援中文 class 名稱，可以在正則裡加入中文 Unicode 範圍，例如 \u4e00-\u9fff。
-
-函式 build_palette(labels: List[str])
-定義：
+```python
 def build_palette(labels: List[str]):
 ents = [re.sub(r"^[BI]-", "", L) for L in labels if L and L != "O"]
 uniq = sorted(set(ents))
@@ -90,7 +89,7 @@ css[f"B-{ent}"] = (f"hsl({hue},85%,90%)", f"hsl({hue},70%,35%)")
 css[f"I-{ent}"] = (f"hsl({hue},85%,96%)", f"hsl({hue},70%,55%)")
 css["O"] = ("transparent", "rgba(0,0,0,.18)")
 return css
-
+```
 說明：
 這個函式用來生成 BIO 標籤的配色方案。
 
