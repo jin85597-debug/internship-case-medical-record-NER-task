@@ -315,23 +315,39 @@ HTML_HEAD = """<!doctype html>
 ## 說明:
 ```php-template
 /* 區塊 */
-details.section{margin:24px 0;border:1px solid var(--line);border-radius:12px;background:var(--card)}
-.sec-inner{padding:16px 18px}
-details.section[open]{border-color:var(--accent)}
-details.section summary{cursor:pointer;list-style:none;padding:14px 18px;font-weight:600;font-size:15px;border-bottom:1px solid var(--line)}
-details.section summary::-webkit-details-marker{display:none}
+details.section{margin:10px 0;border:1px solid var(--line);border-radius:10px;background:#fbfdff}
+details>summary{cursor:pointer;padding:8px 12px;font-weight:700;color:#374151;list-style:none;border-bottom:1px solid var(--line)}
+details>summary::-webkit-details-marker{display:none}
+.sec-inner{padding:8px 12px}
+details.sentence{margin:8px 0;border:1px dashed var(--line);border-radius:10px;background:var(--card)}
+details.sentence>summary{cursor:pointer;padding:8px 10px;color:var(--muted);font-size:12px;list-style:none}
+.sent-body{padding:8px 10px}
 ```
-### 目的：建立可展開的區塊樣式，用於分段呈現內容，提升可讀性與互動性。
+### 目的:建立可展開的區塊與句子樣式，用於分段與逐句呈現 NER 標註結果，提升可讀性與互動性。
 
-`details.section{margin:24px 0;border:1px solid var(--line);border-radius:12px;background:var(--card)}`：區塊容器，使用 details 元素可展開/收合，邊框、圓角、背景色使用全域變數。
+`details.section{margin:10px 0;border:1px solid var(--line);border-radius:10px;background:#fbfdff}`：主區塊容器，上下間距 10px，實線邊框、圓角 10px，背景色為淡藍色 #fbfdff。
 
-`.sec-inner{padding:16px 18px}`：內部內容區，內距設定為上下 16px、左右 18px。
+`details>summary{cursor:pointer;padding:8px 12px;font-weight:700;color:#374151;list-style:none;border-bottom:1px solid var(--line)}`：區塊標題列，游標可點擊，內距 8px 上下、12px 左右，字重 700，字色 #374151，無項目符號，底部加一條分隔線。
 
-`details.section[open]{border-color:var(--accent)}`：展開狀態時，邊框顏色改為強調色 accent。
+`details>summary::-webkit-details-marker{display:none}`：隱藏預設展開箭頭，避免干擾自訂樣式。
 
-`details.section summary{cursor:pointer;list-style:none;padding:14px 18px;font-weight:600;font-size:15px;border-bottom:1px solid var(--line)}`：標題列樣式，設定游標、字級、粗細、內距與底線。
+`.sec-inner{padding:8px 12px}`：區塊內容區，內距 8px 上下、12px 左右。
 
-`details.section summary::-webkit-details-marker{display:none}`：隱藏預設的展開箭頭，改用自訂樣式。
+`details.sentence{margin:8px 0;border:1px dashed var(--line);border-radius:10px;background:var(--card)}`：句子容器，上下間距 8px，虛線邊框、圓角 10px，背景色使用全域變數 --card。
+
+`details.sentence>summary{cursor:pointer;padding:8px 10px;color:var(--muted);font-size:12px;list-style:none}`：句子標題列，游標可點擊，內距 8px 上下、10px 左右，字色使用 muted 色系，字級 12px，無項目符號。
+
+`.sent-body{padding:8px 10px}`：句子內容區，內距 8px 上下、10px 左右。
+
+### 如果要改：
+
+改圓角：調整 border-radius。
+
+改背景色：修改 section 或 sentence 的 background。
+
+改標題字級與字色：調整 summary 的 font-size 與 color。
+
+改展開箭頭樣式：可自行加入 ::after 或 SVG 元素。
 
 ### 如果要改：
 
@@ -346,31 +362,138 @@ details.section summary::-webkit-details-marker{display:none}
 ## 說明:
 ```php-template
 /* token */
-details.sentence{margin:12px 0;border:1px solid var(--line);border-radius:10px;background:#fff}
-.sent-body{padding:10px 14px}
-details.sentence[open]{border-color:var(--accent)}
-details.sentence summary{cursor:pointer;list-style:none;padding:10px 14px;font-weight:500;font-size:14px;border-bottom:1px solid var(--line)}
-details.sentence summary::-webkit-details-marker{display:none}
+.tok{display:inline-block;margin:1px 2px;padding:2px 4px;border-radius:6px;line-height:1.9}
+.tok.O{opacity:.85;border:1px dashed rgba(0,0,0,.18)}
 ```
-### 目的：建立可展開的句子區塊，用於逐句呈現 NER 標註結果，提升可讀性與互動性。
+### 目的：定義每個 token 的呈現方式，用於顯示 NER 標註後的文字單元，具備間距、邊框與可視性調整。
 
-`details.sentence{margin:12px 0;border:1px solid var(--line);border-radius:10px;background:#fff}`：句子容器，使用 details 元素可展開/收合，白底、圓角 10px、邊框使用全域線色。
+`.tok{display:inline-block;margin:1px 2px;padding:2px 4px;border-radius:6px;line-height:1.9}`：每個 token 使用 inline-block 排版，設定上下間距 1px、左右間距 2px，內距 2px 上下、4px 左右，圓角 6px，行高 1.9 提升可讀性。
 
-`.sent-body{padding:10px 14px}`：句子內容區，內距設定為上下 10px、左右 14px。
-
-`details.sentence[open]{border-color:var(--accent)}`：展開狀態時，邊框顏色改為強調色 accent。
-
-`details.sentence summary{cursor:pointer;list-style:none;padding:10px 14px;font-weight:500;font-size:14px;border-bottom:1px solid var(--line)}`：標題列樣式，設定游標、字級 14px、字重 500、內距與底線。
-
-`details.sentence summary::-webkit-details-marker{display:none}`：隱藏預設的展開箭頭，改用自訂樣式。
+`.tok.O{opacity:.85;border:1px dashed rgba(0,0,0,.18)}`：未標註類別的 token（BIO 標記為 "O"），透明度降低至 85%，並使用虛線邊框（rgba 灰色）區隔。
 
 ### 如果要改：
 
-改圓角：調整 sentence 的 border-radius。
+改 token 間距：調整 .tok 的 margin 或 padding。
 
-改展開顏色：修改 [open] 狀態的 border-color。
+改圓角：修改 border-radius。
 
-改標題字級：調整 summary 的 font-size。
+改未標註樣式：調整 .tok.O 的 opacity 或 border 顏色／樣式。
 
-改展開箭頭樣式：自行加入 ::after 或 SVG 元素。
+
+## 說明:
+```php-template
+/* 右欄 */
+.aside-card{border:1px solid var(--line);border-radius:14px;background:#fff;margin:0 0 14px 0}
+.aside-head{padding:12px 14px;border-bottom:1px solid var(--line);font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.aside-body{padding:10px 12px}
+```
+### 目的：建立右側資訊卡片的樣式，用於顯示輔助說明、圖例或控制元件，具備視覺分隔與一致排版。
+
+`.aside-card{border:1px solid var(--line);border-radius:14px;background:#fff;margin:0 0 14px 0}`：整體卡片容器，白底、圓角 14px、底部間距 14px，邊框使用全域線色。
+
+`.aside-head{padding:12px 14px;border-bottom:1px solid var(--line);font-weight:700;display:flex;justify-content:space-between;align-items:center}`：卡片標題列，內距 12px 上下、14px 左右，底部加一條分隔線，字重 700，使用 flex 排版，左右對齊並垂直置中。
+
+`.aside-body{padding:10px 12px}`：卡片內容區，內距 10px 上下、12px 左右。
+
+### 如果要改：
+
+改圓角：調整 .aside-card 的 border-radius。
+
+改排版方式：可改 .aside-head 的 display 為 grid 或 block。
+
+改間距：調整 padding 值以改變內部空間感。
+
+改背景色：修改 .aside-card 的 background。
+
+## 說明:
+```php-template
+/* Legend */
+.legend{display:flex;flex-direction:column;gap:6px}
+.legend .chip{display:flex;width:100%;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:var(--chip);border:1px solid var(--line);font-size:12px}
+.legend .swatch{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.25);display:inline-block}
+.panel{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.chip.btn{cursor:pointer}
+.search{background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 10px;color:var(--ink)}
+.ta{width:100%;height:180px;border:1px solid var(--line);border-radius:10px;padding:10px}
+```
+### 目的：定義圖例區塊、控制面板、互動按鈕與輸入欄位的樣式，用於輔助標註操作與使用者互動。
+`.legend{display:flex;flex-direction:column;gap:6px}`：圖例容器，使用 flex 垂直排列，每項間距 6px。
+
+`.legend .chip{display:flex;width:100%;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:var(--chip);border:1px solid var(--line);font-size:12px}`：每個圖例項目，橢圓形背景（border-radius:999px），左右內距 6px/10px，項目間距 8px，字級 12px，背景色使用全域 chip 色，邊框使用全域線色。
+
+`.legend .swatch{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.25);display:inline-block}`：色塊指示器，寬高 12px，圓角 3px，邊框為灰色半透明，inline-block 顯示。
+
+`.panel{display:flex;flex-wrap:wrap;gap:12px;align-items:center}`：控制面板容器，使用 flex 排版，允許換行，項目間距 12px，垂直置中。
+
+`.chip.btn{cursor:pointer}`：互動按鈕樣式，設定游標為 pointer。
+
+`.search{background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 10px;color:var(--ink)}`：搜尋框樣式，白底、圓角 8px、內距 6px/10px，字色使用 ink 色，邊框使用全域線色。
+
+`.ta{width:100%;height:180px;border:1px solid var(--line);border-radius:10px;padding:10px}`：文字輸入框（textarea）樣式，寬度 100%、高度 180px，圓角 10px，內距 10px，邊框使用全域線色。
+
+
+### 如果要改：
+
+改 chip 外觀：調整 padding、border-radius 或背景色。
+
+改色塊大小：修改 .swatch 的 width / height。
+
+改 panel 排版：調整 flex-wrap 或 gap。
+
+改輸入框尺寸：修改 .ta 的 width / height / padding。
+
+改搜尋框字型與顏色：調整 .search 的 font-family 或 color。
+
+## 說明:
+```php-template
+/* TOC */
+.toc{margin:14px 0 18px 0;display:flex;flex-wrap:wrap;gap:10px}
+.toc a{text-decoration:none;color:var(--accent);font-size:13px;border:1px solid var(--line);padding:4px 8px;border-radius:8px;background:#fff
+```
+### 目的：建立標註類型導覽區（TOC），用於快速跳轉至各類標註區塊，提升頁面導覽效率與使用者體驗。
+
+`.toc{margin:14px 0 18px 0;display:flex;flex-wrap:wrap;gap:10px}`：TOC 容器，使用 flex 排版，允許換行（flex-wrap），項目間距 10px，上下外距分別為 14px 與 18px。
+
+`.toc a{text-decoration:none;color:var(--accent);font-size:13px;border:1px solid var(--line);padding:4px 8px;border-radius:8px;background:#fff`：導覽連結樣式，移除底線（text-decoration:none），字色使用強調色 accent，字級 13px，白底、圓角 8px、內距 4px 上下 / 8px 左右，邊框使用全域線色。
+
+### 如果要改：
+
+改 TOC 排版：調整 .toc 的 flex-wrap、gap 或 margin。
+
+改連結樣式：修改 .toc a 的 font-size、color、padding 或 border-radius。
+
+改背景色或互動狀態：可加入 hover 或 active 樣式提升可點擊感。
+
+## 說明:
+```php-template
+/* 動態 BIO 樣式（由 Python 產） */
+{css_rules}
+</style></head><body><div class="wrap"><h1>{title}</h1><div class="intro">{subtitle}</div>
+```
+### 目的：保留 CSS 插槽供 Python 動態產生 BIO 樣式，並建立 HTML 主體結構，包含容器、標題與副標題。
+
+`{css_rules}`：插槽由後端 Python 產生，用於插入各類 BIO 標註樣式（例如 .tok.PER、.tok.ORG 等），支援多類型命名實體的視覺呈現。
+
+`</style>`：結束 CSS 區塊。
+
+`</head>`：結束 head 區塊，準備進入頁面主體。
+
+`<body>`：開始 HTML 主體內容。
+
+`<div class="wrap">`：主容器，控制整體寬度與左右內距，對應前面 CSS 中的 .wrap 樣式。
+
+`<h1>{title}</h1>`：主標題，內容由後端以 .format() 動態填入。
+
+`<div class="intro">{subtitle}</div>`：副標題區塊，使用 muted 色系，內容同樣由後端動態填入。
+    
+### 如果要改：
+    
+改 BIO 樣式：請在 Python 端定義 {css_rules} 的內容。
+
+改標題文字：呼叫 render_html 時傳入不同 title。
+
+改副標題樣式：調整 .intro 的 CSS 或移除該區塊。
+
+改容器寬度與內距：修改 .wrap 的 max-width 或 padding。
+
 
