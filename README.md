@@ -797,5 +797,29 @@ HTML_INPUT = """
 
 改右欄排版：修改 .aside 的寬度或位置設定
 
+# JSON初始化模板
+```php_template
+HTML_INIT_JSON = """
+<script id="__INIT__" type="application/json">{init_json}</script>
+"""
+```
+### 目的：建立初始化資料的嵌入區塊，將 JSON 結構注入頁面供前端程式讀取。
+
+`<script id="__INIT__" type="application/json">`：嵌入型 JSON 區塊，使用 application/json MIME 類型，id 為 INIT
+
+`{init_json}`：佔位符，用於插入初始化 JSON 字串內容
+
+### 如果要改：
+
+改資料來源：調整 {init_json} 的生成方式
+
+改 script 標籤位置：移動至 head 或 body 其他區段
+
+改識別名稱：變更 id="INIT"
+
+改 MIME 類型：僅限於 application/json，不可改為 text/javascript
+
+改嵌入方式：改用 data-* 屬性或其他 DOM 注入策略
+
 
 
