@@ -1,5 +1,7 @@
 # 臨床 NER HTML 報告產生器
+
 一款輕量級的 Python CLI 工具，用於生成獨立的雙欄式 HTML 報告頁面。使用者可在瀏覽器中貼上醫療文本，完成段落拆分、分詞，並可呼叫 Hugging Face 推論 API 進行實體識別（NER）。
+
 <img width="1308" height="674" alt="image" src="https://github.com/user-attachments/assets/d37e56d4-ecdd-4db6-8ae0-0d3695203a26" />
 
 # 使用教學（步驟）
@@ -41,6 +43,7 @@ re：正則表達式模組，用來做字串替換或模式比對。
 typing 中的 Dict、List：型別標註用，幫助程式可讀性，說明函式參數與回傳的資料結構。
 
 ### 如果要改：
+
 要增加新的外部功能，就在這裡多匯入需要的模組；要改正則或 JSON 格式相關的處理，也會跟這裡匯入的工具有關。
 
 # 後端：HTML 產出的小工具
@@ -79,6 +82,7 @@ html.escape：將特殊字元轉換成 HTML 安全格式，例如 & 變成 &，<
 quote=False：代表不轉換單引號與雙引號。
 
 ### 如果要改：
+
 若想連引號也轉換，將 quote=False 改成 True。若想加入額外過濾，例如單引號變成 '，需要自己再加 replace。
 
 ## 說明：
@@ -93,6 +97,7 @@ def cls_safe(s: str) -> str:
 例如輸入 "心臟病" 會變成 "---"，輸入 "B-DISEASE" 則保持不變。
 
 ### 如果要改：
+
 如果需要支援中文 class 名稱，可以在正則裡加入中文 Unicode 範圍，例如 \u4e00-\u9fff。
 
 ## 說明：
@@ -125,7 +130,8 @@ B- 開頭的標籤用較深顏色，I- 開頭的標籤用較淺顏色。
 
 O 類型設成透明背景和淡灰色虛線邊框。
 
-### 如果要改：
+### 如果要改:
+
 可以調整 HSL 裡面的亮度或飽和度，控制顏色深淺；或者對特定實體強制指定顏色，例如 "DISEASE" 永遠用紅色。
 
 #  HTML 頁首模板
@@ -197,6 +203,7 @@ HTML_HEAD = """<!doctype html>
   <div class="intro">{subtitle}</div>
 """
 ```
+
 ## 說明:
 ```php-template
 HTML_HEAD = """<!doctype html>
@@ -212,7 +219,7 @@ HTML_HEAD = """<!doctype html>
   h1{{margin:0 0 6px 0;font-size:28px;font-weight:800}}
   .intro{{color:var(--muted);margin:2px 0 14px 0}}
 ```
-###目的：建立 HTML5 頁面骨架、設定語系與基礎 SEO/響應式標頭，並放入全域 CSS 變數與標題/副標題的基本樣式。
+### 目的：建立 HTML5 頁面骨架、設定語系與基礎 SEO/響應式標頭，並放入全域 CSS 變數與標題/副標題的基本樣式。
 
 `<!doctype html>`：指定 HTML5，避免瀏覽器進怪異模式。
 
@@ -234,7 +241,7 @@ HTML_HEAD = """<!doctype html>
 
 `.intro{{color:var(--muted);margin:2px 0 14px 0}}`：副標題的字色與間距，使用較 muted 的顏色變數。
 
-###如果要改：
+### 如果要改：
 
 改語系：把 <html lang="zh-Hant"> 換成 en、ja 等。
 
@@ -248,7 +255,7 @@ HTML_HEAD = """<!doctype html>
 
 改字型：在 html,body 的 font-family 裡增刪字體（注意字體回退順序）。
 
-##說明:
+## 說明:
 ```php-template
 /* 兩欄 */
 .layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;margin-top:12px}
@@ -256,7 +263,7 @@ HTML_HEAD = """<!doctype html>
 @media (max-width:1100px){ .layout{grid-template-columns:1fr} .aside{position:static;max-height:none;overflow:visible;padding:0} }
 ```
 
-###目的：建立主內容與側欄的兩欄排版，並在窄螢幕下自動轉為單欄，提升閱讀性與響應式體驗。
+### 目的：建立主內容與側欄的兩欄排版，並在窄螢幕下自動轉為單欄，提升閱讀性與響應式體驗。
 
 `.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;margin-top:12px}`：使用 CSS Grid 建立兩欄結構，左側主欄自動撐滿，右側側欄固定寬度 340px，欄間距 16px，與上方區塊間距 12px。
 
@@ -264,7 +271,7 @@ HTML_HEAD = """<!doctype html>
 
 `@media (max-width:1100px){ .layout{grid-template-columns:1fr} .aside{position:static;max-height:none;overflow:visible;padding:0} }`：當螢幕寬度小於 1100px 時，自動改為單欄排版，側欄取消 sticky 並移除高度限制與捲動，改為完整顯示。
 
-###如果要改：
+### 如果要改：
 
 改側欄寬度：調整 .layout 的 grid-template-columns。
 
