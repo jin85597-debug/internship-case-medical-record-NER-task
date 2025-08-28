@@ -98,16 +98,16 @@ def cls_safe(s: str) -> str:
 ## 說明：
 ```python
 def build_palette(labels: List[str]):
-ents = [re.sub(r"^[BI]-", "", L) for L in labels if L and L != "O"]
-uniq = sorted(set(ents))
-total = max(1, len(uniq))
-css = {}
-for i, ent in enumerate(uniq):
-hue = int(360 * i / total)
-css[f"B-{ent}"] = (f"hsl({hue},85%,90%)", f"hsl({hue},70%,35%)")
-css[f"I-{ent}"] = (f"hsl({hue},85%,96%)", f"hsl({hue},70%,55%)")
-css["O"] = ("transparent", "rgba(0,0,0,.18)")
-return css
+    ents = [re.sub(r"^[BI]-", "", L) for L in labels if L and L != "O"]
+    uniq = sorted(set(ents))
+    total = max(1, len(uniq))
+    css = {}
+    for i, ent in enumerate(uniq):
+        hue = int(360 * i / total)
+        css[f"B-{ent}"] = (f"hsl({hue},85%,90%)", f"hsl({hue},70%,35%)")
+        css[f"I-{ent}"] = (f"hsl({hue},85%,96%)", f"hsl({hue},70%,55%)")
+    css["O"] = ("transparent", "rgba(0,0,0,.18)")
+    return css
 ```
 這個函式用來生成 BIO 標籤的配色方案。
 
