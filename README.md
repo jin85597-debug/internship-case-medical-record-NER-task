@@ -2,7 +2,7 @@
 一款輕量級的 Python CLI 工具，用於生成獨立的雙欄式 HTML 報告頁面。使用者可在瀏覽器中貼上醫療文本，完成段落拆分、分詞，並可呼叫 Hugging Face 推論 API 進行實體識別（NER）。
 <img width="1308" height="674" alt="image" src="https://github.com/user-attachments/assets/d37e56d4-ecdd-4db6-8ae0-0d3695203a26" />
 
-使用教學（步驟）
+# 使用教學（步驟）
 
 在瀏覽器開啟 ner_report.html。
 
@@ -28,7 +28,7 @@
 
 可下載三種 JSONL：segments.jsonl、ner_token_rows.jsonl、ner_labeled.jsonl。
 
-Hugging Face Token 申請
+# Hugging Face Token 申請
 
 註冊或登入 Hugging Face：https://huggingface.co/join
 
