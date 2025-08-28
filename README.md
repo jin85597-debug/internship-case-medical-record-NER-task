@@ -1437,7 +1437,7 @@ function rebuildPage(){
           const span = document.createElement('span');
           span.className = `tok ${labCls} ent-${ent.replace(/[^\\w-]/g,'-')} ${lab==='O'?'O':''}`;
           span.dataset.ent = ent; span.dataset.label = lab;
-          span.innerHTML = htmlEscape(rec.text).replace(/ /g,'&nbsp;'); // 保留空白視覺
+          span.innerHTML = htmlEscape(rec.text).replace(/ /g,'&bsp;'); // 保留空白視覺
           sbody.appendChild(span);
         });
         inner.appendChild(sent);
@@ -1540,5 +1540,57 @@ $('#btnClear').addEventListener('click', ()=>{
 </script>
 """
 ```
+ #  基本工具/常數 
+```php_template
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+function htmlEscape(s){
+  return (s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+function slug(s){
+  return (s||'').toLowerCase()
+    .replace(/[^a-z0-9\\u4e00-\\u9fff_-]+/g,'-')
+    .replace(/^-|-$/g,'');                      
+}
+function natKey(s){
+
+  return (s+'').split(/(\\d+)/).map(p => /^\\d+$/.test(p) ? Number(p) : p.toLowerCase());
+}
+const natCmp = (a, b) => {
+  const ka = natKey(a), kb = natKey(b);
+  for (let i = 0; i < Math.max(ka.length, kb.length); i++) {
+    if (ka[i] == null) return -1;            
+    if (kb[i] == null) return 1;             
+    if (ka[i] < kb[i]) return -1;
+    if (ka[i] > kb[i]) return 1;
+  }
+  return 0;
+};
+function downloadText(filename, text){
+
+  const blob = new Blob([text], {type:'application/json;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+```
+## 解釋
+- $ 是單一 DOM 元素選取器，簡化 document.querySelector 的寫法，回傳第一個符合的元素。
+- $$ 是多元素選取器，簡化 document.querySelectorAll 並轉成真正的 Array，方便使用陣列方法。
+- htmlEscape(s) 是文字轉義函式，將 &, <, >, " 四個字元轉成 HTML 實體，避免 innerHTML 出現 XSS 或破版。
+- slug(s) 是分類鍵生成函式，將任意字串轉成 URL-safe 格式，清除不合法字元並轉成小寫，首尾的 - 也會移除。
+- natKey(s) 是自然排序鍵生成函式，將字串拆成文字與數字段落，供 natCmp 使用。
+- natCmp(a, b) 是自然排序比較器，使用 natKey 拆解後逐段比較，支援混合排序與長度不一致。
+- downloadText(filename, text) 是前端匯出函式，將字串打包成 Blob 並觸發下載，避免後端 round-trip。
+## 注意事項
+- $ 必須回傳單一元素（Element 或 null），不能改成回傳陣列或 NodeList。
+- $$ 必須回傳 Array 型別，不能改成 NodeList 或其他結構。
+- htmlEscape 只能處理四個字元：&, <, >, "，不能改成整段 HTML 處理器。
+- slug 的正則不可改為保留特殊符號，否則分類鍵會失效。
+- natKey 必須回傳段落陣列，不能改成單一字串或整合型鍵值。
+- natCmp 必須依賴 natKey 結構，不能改成 localeCompare 或其他比較方式。
+- downloadText 必須使用 setTimeout 釋放 URL，不能移除，否則會造成記憶體洩漏。
+- downloadText 的 MIME 類型與 Blob 結構不可改動，除非同步調整匯出格式與接收端解析邏輯。
+
 
 
