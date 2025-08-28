@@ -314,7 +314,7 @@ HTML_HEAD = """<!doctype html>
 
 ## 說明:
 ```php-template
-/* 區塊樣式 */
+/* 區塊 */
 details.section{margin:24px 0;border:1px solid var(--line);border-radius:12px;background:var(--card)}
 .sec-inner{padding:16px 18px}
 details.section[open]{border-color:var(--accent)}
@@ -345,7 +345,7 @@ details.section summary::-webkit-details-marker{display:none}
 
 ## 說明:
 ```php-template
-/* 句子樣式 */
+/* token */
 details.sentence{margin:12px 0;border:1px solid var(--line);border-radius:10px;background:#fff}
 .sent-body{padding:10px 14px}
 details.sentence[open]{border-color:var(--accent)}
