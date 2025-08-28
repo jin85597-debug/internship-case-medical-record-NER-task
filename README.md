@@ -1558,7 +1558,7 @@ $('#btnClear').addEventListener('click', ()=>{
 </script>
 """
 ```
- #  基本工具/常數 
+ #  基本工具/常數區塊 
 ```php_template
 const $  = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
