@@ -127,3 +127,107 @@ O 類型設成透明背景和淡灰色虛線邊框。
 
 ### 如果要改：
 可以調整 HSL 裡面的亮度或飽和度，控制顏色深淺；或者對特定實體強制指定顏色，例如 "DISEASE" 永遠用紅色。
+
+#  HTML 頁首模板
+```php-template
+HTML_HEAD = """<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>{title}</title>
+<style>
+  :root{{--bg:#fff;--ink:#1f2937;--muted:#64748b;--card:#f7fafc;--line:#e5e7eb;--accent:#0b5fff;--chip:#f2f4f8}}
+  html,body{{background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial,'Noto Sans',sans-serif;margin:0}}
+  .wrap{{max-width:1280px;margin:28px auto;padding:0 18px}}
+  h1{{margin:0 0 6px 0;font-size:28px;font-weight:800}}
+  .intro{{color:var(--muted);margin:2px 0 14px 0}}
+
+  /* 兩欄 */
+  .layout{{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;margin-top:12px}}
+  .aside{{position:sticky;top:64px;align-self:start;max-height:calc(100vh - 80px);overflow:auto;padding-right:4px}}
+  @media (max-width:1100px){{ .layout{{grid-template-columns:1fr}} .aside{{position:static;max-height:none}} }}
+
+  /* 卡片 */
+  .file-block{{border:1px solid var(--line);border-radius:14px;margin:16px 0;background:#fff}}
+  .file-head{{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}}
+  .file-title{{font-size:16px;font-weight:700}}
+  .file-sub{{color:var(--muted);font-size:12px}}
+  .file-body{{padding:8px 14px 14px 14px}}
+
+  /* 區塊 */
+  details.section{{margin:10px 0;border:1px solid var(--line);border-radius:10px;background:#fbfdff}}
+  details>summary{{cursor:pointer;padding:8px 12px;font-weight:700;color:#374151;list-style:none;border-bottom:1px solid var(--line)}}
+  details>summary::-webkit-details-marker{{display:none}}
+  .sec-inner{{padding:8px 12px}}
+  details.sentence{{margin:8px 0;border:1px dashed var(--line);border-radius:10px;background:var(--card)}}
+  details.sentence>summary{{cursor:pointer;padding:8px 10px;color:var(--muted);font-size:12px;list-style:none}}
+  .sent-body{{padding:8px 10px}}
+
+  /* token */
+  .tok{{display:inline-block;margin:1px 2px;padding:2px 4px;border-radius:6px;line-height:1.9}}
+  .tok.O{{opacity:.85;border:1px dashed rgba(0,0,0,.18)}}
+
+  /* 右欄 */
+  .aside-card{{border:1px solid var(--line);border-radius:14px;background:#fff;margin:0 0 14px 0}}
+  .aside-head{{padding:12px 14px;border-bottom:1px solid var(--line);font-weight:700;display:flex;justify-content:space-between;align-items:center}}
+  .aside-body{{padding:10px 12px}}
+
+  /* Legend */
+  .legend{{display:flex;flex-direction:column;gap:6px}}
+  .legend .chip{{display:flex;width:100%;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:var(--chip);border:1px solid var(--line);font-size:12px}}
+  .legend .swatch{{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.25);display:inline-block}}
+
+  .panel{{display:flex;flex-wrap:wrap;gap:12px;align-items:center}}
+  .chip.btn{{cursor:pointer}}
+  .search{{background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 10px;color:var(--ink)}}
+  .ta{{width:100%;height:180px;border:1px solid var(--line);border-radius:10px;padding:10px}}
+
+  /* TOC */
+  .toc{{margin:14px 0 18px 0;display:flex;flex-wrap:wrap;gap:10px}}
+  .toc a{{text-decoration:none;color:var(--accent);font-size:13px;border:1px solid var(--line);padding:4px 8px;border-radius:8px;background:#fff}}
+
+  /* 動態 BIO 樣式（由 Python 產） */
+  {css_rules}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>{title}</h1>
+  <div class="intro">{subtitle}</div>
+"""
+```
+## 說明:
+```php-template
+HTML_HEAD = """<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>{title}</title>
+<style>
+  :root{{--bg:#fff;--ink:#1f2937;--muted:#64748b;--card:#f7fafc;--line:#e5e7eb;--accent:#0b5fff;--chip:#f2f4f8}}
+  html,body{{background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial,'Noto Sans',sans-serif;margin:0}}
+  .wrap{{max-width:1280px;margin:28px auto;padding:0 18px}}
+  h1{{margin:0 0 6px 0;font-size:28px;font-weight:800}}
+  .intro{{color:var(--muted);margin:2px 0 14px 0}}
+```
+###目的：建立 HTML5 頁面骨架、設定語系與基礎 SEO/響應式標頭，並放入全域 CSS 變數與標題/副標題的基本樣式。
+<!doctype html>：指定 HTML5，避免瀏覽器進怪異模式。
+<html lang="zh-Hant">：主要語系為繁體中文，影響拼字檢查、螢幕閱讀器與搜尋引擎語言判定。 
+<meta charset="utf-8"/>：UTF-8 編碼，避免中文字亂碼。 
+<meta name="viewport"...>：mobile-first 響應式，寬度隨裝置，初始縮放 1。 
+<title>{title}</title>：頁面標題，{title} 是後端用 .format() 動態填入。 
+:root{--bg/...}：定義全站 CSS 變數（背景、字色、輔助色、邊框色、強調色等），方便統一調色。 
+html, body：套用全域字型與顏色、移除預設邊距。
+.wrap：中心容器，最大寬度 1280px，置中並留左右內距。 
+h1：主標題字級、粗細、間距。 
+.intro：副標題的字色與間距，使用較 muted 的顏色變數。
+
+###如果要改：
+改語系：把 <html lang="zh-Hant"> 換成 en、ja 等。
+改標題：呼叫 render_html 時傳入不同 title。
+改副標題：同上傳入不同 subtitle，或刪除 .intro 的輸出。
+改整體配色：只需調整 :root 的變數值（例如 --bg, --ink, --accent）。
+改版面寬度：調整 .wrap 的 max-width 或左右 padding。
+改字型：在 html,body 的 font-family 裡增刪字體（注意字體回退順序）。
