@@ -620,7 +620,182 @@ HTML_INPUT = """
 
 `<input id="inToken" class="search" style="width:260px" placeholder="hf_xxx"/>`：Token 輸入框，提示文字 hf_xxx
 
+## 說明:
+```php_template
+<textarea id="inText" class="ta" placeholder="在此貼上整段病歷文字…"></textarea>
+          <div class="panel" style="margin-top:10px">
+            <span class="chip btn" id="btnPreprocess">① 只斷段 + 分詞</span>
+            <span class="chip btn" id="btnRunNER">② 斷段 + 分詞 + NER</span>
+            <span class="chip btn" id="btnClear">清除貼上結果</span>
+```
+### 目的:建立病歷輸入區與執行操作按鈕，供使用者貼上文字並選擇處理方式。
 
+`<textarea id="inText" class="ta" placeholder="在此貼上整段病歷文字…">`：多行文字輸入欄，使用 ta 樣式，提示文字為「在此貼上整段病歷文字…」
+
+`<div class="panel" style="margin-top:10px">`：操作按鈕容器，頂部間距 10px
+    
+`<span class="chip btn" id="btnPreprocess">`：執行「只斷段 + 分詞」按鈕
+
+`<span class="chip btn" id="btnRunNER">`：執行「斷段 + 分詞 + NER」按鈕
+
+`<span class="chip btn" id="btnClear">`：清除貼上結果按鈕
+
+### 如果要改：
+
+改輸入欄高度：調整 .ta 的 CSS
+
+改提示文字：修改 placeholder 屬性
+
+改按鈕文字：直接修改 span 內容
+
+改按鈕順序：調整 span 排列順序
+
+改按鈕樣式：修改 .chip.btn 的 CSS 定義
+
+改按鈕功能：調整 JS 綁定的事件處理邏輯
+
+## 說明:
+```php_template
+<span class="chip">下載：
+  <button type="button" id="dlSegments" class="btn" disabled style="margin-left:4px">segments.jsonl</button>
+  <button type="button" id="dlTokens" class="btn" disabled>ner_token_rows.jsonl</button>
+  <button type="button" id="dlLabeled" class="btn" disabled>ner_labeled.jsonl</button>
+</span>
+```
+### 目的：建立下載區塊，提供使用者匯出處理後的 JSONL 結果檔案。
+
+`<span class="chip">`：下載區容器，使用 chip 樣式
+
+`<button type="button" id="dlSegments" class="btn" disabled style="margin-left:4px">`：下載斷段結果 segments.jsonl，左側間距 4px，預設 disabled
+
+`<button type="button" id="dlTokens" class="btn" disabled>`：下載分詞結果 ner_token_rows.jsonl，預設 disabled
+
+`<button type="button" id="dlLabeled" class="btn" disabled>`：下載標註結果 ner_labeled.jsonl，預設 disabled
+
+### 如果要改：
+
+改檔案名稱：修改 button 顯示文字
+
+改啟用狀態：移除 disabled 或由 JS 控制
+
+改按鈕順序：調整 button 排列順序
+
+改按鈕樣式：修改 .btn 的 CSS 定義
+
+改間距設定：調整 style="margin-left:..." 或使用 CSS 類別
+
+## 說明:
+```php_template
+  </div>
+          <div id="inStatus" class="intro" style="margin-top:6px"></div>
+        </div>
+      </details>
+      <div class="toc" id="toc"></div>
+    </div>
+```
+### 目的：結束輸入卡片區塊並建立標註類型導覽區，供使用者快速跳轉至各類標註結果。
+
+`</div>`：結束下載區塊容器
+
+`<div id="inStatus" class="intro" style="margin-top:6px">`：狀態提示容器，使用 intro 樣式，頂部間距 6px
+
+`</div>`：結束 file-body 區塊
+
+`</details>`：結束輸入卡片容器
+
+`<div class="toc" id="toc">`：標註類型導覽容器，使用 toc 樣式，由 JS 動態填入
+
+`</div>`：結束主欄容器 mainCol
+
+### 如果要改：
+
+改狀態提示樣式：修改 .intro 的 CSS
+
+改導覽區排版：調整 .toc 的 flex 或 gap 設定
+
+改導覽內容：由 JS 控制 toc 的填入邏輯
+
+改容器結構：調整結束順序或包裝層級
+
+改導覽命名：變更 id="toc" 以符合語意
+
+## 說明:
+```php_template
+<aside class="aside">
+  <div class="aside-card">
+    <div class="aside-head">標籤
+      <span>
+        <button type="button" class="chip btn" id="selAll">全選</button>
+        <button type="button" class="chip btn" id="selNone">全不選</button>
+      </span>
+    </div>
+    <div class="aside-body"><div class="legend" id="legend"></div></div>
+  </div>
+```
+### 目的：建立右欄標籤選擇區，提供使用者快速選取或取消所有標註類型，並顯示標籤圖例。
+
+`<aside class="aside">`：右欄容器，包含標籤與摘要卡片
+
+`<div class="aside-card">`：標籤選擇卡片容器
+
+`<div class="aside-head">`：卡片標題列，顯示「標籤」文字
+
+`<span>`：按鈕群組容器
+
+`<button type="button" class="chip btn" id="selAll">`：全選按鈕，id 為 selAll
+
+`<button type="button" class="chip btn" id="selNone">`：全不選按鈕，id 為 selNone
+
+`<div class="aside-body">`：卡片內容容器
+
+`<div class="legend" id="legend">`：標籤圖例容器，由 JS 動態填入
+
+###如果要改：
+
+改按鈕文字：直接修改 button 內容
+
+改按鈕功能：調整 JS 綁定邏輯
+
+改圖例內容：由 JS 控制 legend 的填入方式
+
+改卡片樣式：修改 .aside-card 的 CSS
+
+改按鈕排列方式：調整 span 的排版設定
+
+改右欄寬度：修改 .aside 的 CSS 定義
+
+## 說明:
+```php_template
+   <div class="aside-card">
+        <div class="aside-head">標註摘要</div>
+        <div class="aside-body" id="annSummary"></div>
+      </div>
+    </aside>
+  </div>
+```
+### 目的：建立右欄標註摘要區塊，顯示目前標註結果的統計或彙整資訊。
+
+`<div class="aside-card">`：標註摘要卡片容器
+    
+`<div class="aside-head">`：卡片標題列，顯示「標註摘要」文字
+    
+`<div class="aside-body" id="annSummary">`：摘要內容容器，id 為 annSummary，由 JS 動態填入
+
+`</aside>`：結束右欄容器
+
+`</div>`：結束整體 layout 容器
+
+### 如果要改：
+
+改標題文字：修改 .aside-head 的內容
+
+改摘要樣式：調整 .aside-body 或 #annSummary 的 CSS
+
+改填入邏輯：修改 JS 對 annSummary 的更新方式
+
+改卡片順序：調整 aside-card 的排列順序
+
+改右欄排版：修改 .aside 的寬度或位置設定
 
 
 
