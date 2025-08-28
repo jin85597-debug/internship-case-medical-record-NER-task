@@ -235,11 +235,17 @@ HTML_HEAD = """<!doctype html>
 `.intro{{color:var(--muted);margin:2px 0 14px 0}}`：副標題的字色與間距，使用較 muted 的顏色變數。
 
 ###如果要改：
+
 改語系：把 <html lang="zh-Hant"> 換成 en、ja 等。
+
 改標題：呼叫 render_html 時傳入不同 title。
+
 改副標題：同上傳入不同 subtitle，或刪除 .intro 的輸出。
+
 改整體配色：只需調整 :root 的變數值（例如 --bg, --ink, --accent）。
+
 改版面寬度：調整 .wrap 的 max-width 或左右 padding。
+
 改字型：在 html,body 的 font-family 裡增刪字體（注意字體回退順序）。
 
 ##說明:
@@ -259,6 +265,9 @@ HTML_HEAD = """<!doctype html>
 `@media (max-width:1100px){ .layout{grid-template-columns:1fr} .aside{position:static;max-height:none;overflow:visible;padding:0} }`：當螢幕寬度小於 1100px 時，自動改為單欄排版，側欄取消 sticky 並移除高度限制與捲動，改為完整顯示。
 
 ###如果要改：
+
 改側欄寬度：調整 .layout 的 grid-template-columns。
+
 改 sticky 高度：調整 .aside 的 top 值。
+
 改響應式斷點：修改 @media 的 max-width 數值。
