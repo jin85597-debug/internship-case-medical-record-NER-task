@@ -213,25 +213,26 @@ HTML_HEAD = """<!doctype html>
   .intro{{color:var(--muted);margin:2px 0 14px 0}}
 ```
 ###目的：建立 HTML5 頁面骨架、設定語系與基礎 SEO/響應式標頭，並放入全域 CSS 變數與標題/副標題的基本樣式。
-`<!doctype html>：指定 HTML5，避免瀏覽器進怪異模式。`
 
-`<html lang="zh-Hant">：主要語系為繁體中文，影響拼字檢查、螢幕閱讀器與搜尋引擎語言判定。`
+`<!doctype html>`：指定 HTML5，避免瀏覽器進怪異模式。
 
-`<meta charset="utf-8"/>：UTF-8 編碼，避免中文字亂碼。` 
+`<html lang="zh-Hant">`：主要語系為繁體中文，影響拼字檢查、螢幕閱讀器與搜尋引擎語言判定。
 
-`<meta name="viewport" content="width=device-width, initial-scale=1"/>：mobile-first 響應式，寬度隨裝置，初始縮放 1。` 
+`<meta charset="utf-8"/>`：UTF-8 編碼，避免中文字亂碼。
 
-`<title>{title}</title>：頁面標題，{title} 是後端用 .format() 動態填入。` 
+`<meta name="viewport" content="width=device-width, initial-scale=1"/>`：mobile-first 響應式，寬度隨裝置，初始縮放 1。
 
-`:root{--bg/...}：定義全站 CSS 變數（背景、字色、輔助色、邊框色、強調色等），方便統一調色。`
+`<title>{title}</title>`：頁面標題，{title} 是後端用 .format() 動態填入。
 
-`html, body：套用全域字型與顏色、移除預設邊距。`
+`:root{{--bg:#fff;--ink:#1f2937;--muted:#64748b;--card:#f7fafc;--line:#e5e7eb;--accent:#0b5fff;--chip:#f2f4f8}}`：定義全站 CSS 變數（背景、字色、輔助色、邊框色、強調色等），方便統一調色。
 
-`.wrap：中心容器，最大寬度 1280px，置中並留左右內距。` 
+` html,body{{background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial,'Noto Sans',sans-serif;margin:0}}`：套用全域字型與顏色、移除預設邊距。
 
-`h1：主標題字級、粗細、間距。` 
+` .wrap{{max-width:1280px;margin:28px auto;padding:0 18px}}`：中心容器，最大寬度 1280px，置中並留左右內距。
 
-`.intro：副標題的字色與間距，使用較 muted 的顏色變數。`
+`h1{{margin:0 0 6px 0;font-size:28px;font-weight:800}}`：主標題字級、粗細、間距。
+
+` .intro{{color:var(--muted);margin:2px 0 14px 0}}`：副標題的字色與間距，使用較 muted 的顏色變數。
 
 ###如果要改：
 改語系：把 <html lang="zh-Hant"> 換成 en、ja 等。
