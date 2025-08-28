@@ -84,7 +84,7 @@ quote=False：代表不轉換單引號與雙引號。
 ## 說明：
 ```python
 def cls_safe(s: str) -> str:
-return re.sub(r"[^a-zA-Z0-9_-]+", "-", s)
+    return re.sub(r"[^a-zA-Z0-9_-]+", "-", s)
 ```
 這個函式會把輸入的字串轉成安全可用於 CSS class 名稱的形式。
 
