@@ -342,3 +342,35 @@ details.section summary::-webkit-details-marker{display:none}
 改標題字級：調整 summary 的 font-size。
 
 改展開箭頭樣式：自行加入 ::after 或 SVG 元素。
+
+## 說明:
+```php-template
+/* 句子樣式 */
+details.sentence{margin:12px 0;border:1px solid var(--line);border-radius:10px;background:#fff}
+.sent-body{padding:10px 14px}
+details.sentence[open]{border-color:var(--accent)}
+details.sentence summary{cursor:pointer;list-style:none;padding:10px 14px;font-weight:500;font-size:14px;border-bottom:1px solid var(--line)}
+details.sentence summary::-webkit-details-marker{display:none}
+```
+### 目的：建立可展開的句子區塊，用於逐句呈現 NER 標註結果，提升可讀性與互動性。
+
+`details.sentence{margin:12px 0;border:1px solid var(--line);border-radius:10px;background:#fff}`：句子容器，使用 details 元素可展開/收合，白底、圓角 10px、邊框使用全域線色。
+
+`.sent-body{padding:10px 14px}`：句子內容區，內距設定為上下 10px、左右 14px。
+
+`details.sentence[open]{border-color:var(--accent)}`：展開狀態時，邊框顏色改為強調色 accent。
+
+`details.sentence summary{cursor:pointer;list-style:none;padding:10px 14px;font-weight:500;font-size:14px;border-bottom:1px solid var(--line)}`：標題列樣式，設定游標、字級 14px、字重 500、內距與底線。
+
+`details.sentence summary::-webkit-details-marker{display:none}`：隱藏預設的展開箭頭，改用自訂樣式。
+
+### 如果要改：
+
+改圓角：調整 sentence 的 border-radius。
+
+改展開顏色：修改 [open] 狀態的 border-color。
+
+改標題字級：調整 summary 的 font-size。
+
+改展開箭頭樣式：自行加入 ::after 或 SVG 元素。
+
