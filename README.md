@@ -822,7 +822,7 @@ HTML_INIT_JSON = """
 改嵌入方式：改用 data-* 屬性或其他 DOM 注入策略
 
 # HTML_SCRIPT函式模組
-‵``php_template
+```php_template
 HTML_SCRIPT = """
 <script>
 /* ====== 基本工具/常數 ====== */
