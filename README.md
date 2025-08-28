@@ -44,13 +44,32 @@ typing 中的 Dict、List：型別標註用，幫助程式可讀性，說明函�
 要增加新的外部功能，就在這裡多匯入需要的模組；要改正則或 JSON 格式相關的處理，也會跟這裡匯入的工具有關。
 
 # 後端：HTML 產出的小工具
+```python
+def esc(s: str) -> str:
+    return html.escape(str(s), quote=False)
 
+def cls_safe(s: str) -> str:
+    return re.sub(r"[^a-zA-Z0-9_-]+", "-", s)
+
+def build_palette(labels: List[str]):
+    ents = [re.sub(r"^[BI]-", "", L) for L in labels if L and L != "O"]
+    uniq = sorted(set(ents))
+    total = max(1, len(uniq))
+    css = {}
+    for i, ent in enumerate(uniq):
+        hue = int(360 * i / total)
+        css[f"B-{ent}"] = (f"hsl({hue},85%,90%)", f"hsl({hue},70%,35%)")
+        css[f"I-{ent}"] = (f"hsl({hue},85%,96%)", f"hsl({hue},70%,55%)")
+    css["O"] = ("transparent", "rgba(0,0,0,.18)")
+    return css
+```
+
+
+## 說明：
 ```python
 def esc(s: str) -> str:
     return html.escape(str(s), quote=False)
 ```
-
-## 說明：
 這個函式的目的是將輸入的文字做 HTML 字元轉義，避免被當成 HTML 標籤或導致 XSS。
 
 參數 s：傳入的任意資料，會先被轉成字串。
@@ -62,11 +81,11 @@ quote=False：代表不轉換單引號與雙引號。
 ### 如果要改：
 若想連引號也轉換，將 quote=False 改成 True。若想加入額外過濾，例如單引號變成 '，需要自己再加 replace。
 
+## 說明：
 ```python
 def cls_safe(s: str) -> str:
 return re.sub(r"[^a-zA-Z0-9_-]+", "-", s)
 ```
-## 說明：
 這個函式會把輸入的字串轉成安全可用於 CSS class 名稱的形式。
 
 使用正則表達式 re.sub，將所有不是字母、數字、底線、連字號的字元，通通換成一個連字號。
@@ -75,6 +94,8 @@ return re.sub(r"[^a-zA-Z0-9_-]+", "-", s)
 
 ### 如果要改：
 如果需要支援中文 class 名稱，可以在正則裡加入中文 Unicode 範圍，例如 \u4e00-\u9fff。
+
+## 說明：
 ```python
 def build_palette(labels: List[str]):
 ents = [re.sub(r"^[BI]-", "", L) for L in labels if L and L != "O"]
@@ -88,7 +109,6 @@ css[f"I-{ent}"] = (f"hsl({hue},85%,96%)", f"hsl({hue},70%,55%)")
 css["O"] = ("transparent", "rgba(0,0,0,.18)")
 return css
 ```
-## 說明：
 這個函式用來生成 BIO 標籤的配色方案。
 
 先把標籤去掉 B- 或 I- 前綴，只留下實體名稱，例如 DISEASE。
