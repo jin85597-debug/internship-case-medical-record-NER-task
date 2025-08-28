@@ -2,30 +2,44 @@
 一款輕量級的 Python CLI 工具，用於生成獨立的雙欄式 HTML 報告頁面。使用者可在瀏覽器中貼上醫療文本，完成段落拆分、分詞，並可呼叫 Hugging Face 推論 API 進行實體識別（NER）。
 <img width="1308" height="674" alt="image" src="https://github.com/user-attachments/assets/d37e56d4-ecdd-4db6-8ae0-0d3695203a26" />
 
-# 主要功能
-單檔 HTML：城市碼執行後直接以瀏覽器開啟.HTML即可使用，不需額外伺服器。
+使用教學（步驟）
 
-離線可用：基本的斷段、分詞完全本地完成。
+在瀏覽器開啟 ner_report.html。
 
-雲端 NER：若輸入 Hugging Face Token，會呼叫 Hugging Face API（預設模型：d4data/biomedical-ner-all）。
+在頁面左欄的「➕ 貼上病歷文字並處理」區塊：
 
-章節切割：自動辨識「診斷、主訴、過去病史、住院治療經過」等章節。
+輸入「工作表名稱」（檔名標籤，預設 pasted.txt）
 
-BIO 標註上色：B- 深色、I- 淺色、O 虛線框，不同實體採 HSL 均分色相，確保穩定配色。
+（可選）輸入「HF 模型」，預設 d4data/biomedical-ner-all
 
-右側控制面板：
+（可選）輸入「HF Token」（格式 hf_xxx...）
 
-標籤：一鍵全選/全不選、逐實體開關顯示。
+貼上整段病歷文字到 textarea。
 
-標註摘要：自動彙總每個章節中的連續實體片段。
+選擇：
 
-資料下載：介面可直接下載三種 JSONL：
+① 只斷段 + 分詞：離線處理，僅切章節/分句/分詞，不做 NER。
 
-分句結果:segments.jsonl
+② 斷段 + 分詞 + NER：在分詞後呼叫 HF API 做 NER（需要 Token）。
 
-分詞結果:ner_token_rows.jsonl
+右側 Legend 可一鍵全選/全不選；也可逐一切換實體顯示強度。
 
-BIO 標註結果:ner_labeled.jsonl
+右側「標註摘要」會自動彙總每章節連續實體片段。
+
+可下載三種 JSONL：segments.jsonl、ner_token_rows.jsonl、ner_labeled.jsonl。
+
+Hugging Face Token 申請
+
+註冊或登入 Hugging Face：https://huggingface.co/join
+
+前往 Access Tokens：https://huggingface.co/settings/tokens
+
+建立 New token，權限選 Read。
+
+複製顯示的 Token（格式 hf_xxx...），貼到網頁右上設定欄位（或輸入框）中。
+
+注意：若 Token 無效或過期，呼叫 API 會回 401；頁面會顯示錯誤訊息。
+
 # 技術棧
 - Python 3.7+（僅使用標準函式庫：argparse、json、html、re、typing）
 - HTML5、CSS3、現代 JavaScript (ES6+)
