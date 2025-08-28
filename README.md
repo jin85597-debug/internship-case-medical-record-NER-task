@@ -17,11 +17,12 @@ Legend：一鍵全選/全不選、逐實體開關顯示。
 摘要：自動彙總每個章節中的連續實體片段。
 
 資料下載：介面可直接下載三種 JSONL：
-segments.jsonl：句段
 
-ner_token_rows.jsonl：分詞 token
+segments.jsonl：分句結果
 
-ner_labeled.jsonl：BIO 標註
+ner_token_rows.jsonl：分詞結果
+
+ner_labeled.jsonl：BIO 標註結果
 # 技術棧
 - Python 3.7+（僅使用標準函式庫：argparse、json、html、re、typing）
 - HTML5、CSS3、現代 JavaScript (ES6+)
