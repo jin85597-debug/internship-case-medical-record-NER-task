@@ -4,8 +4,6 @@
 
 # 使用教學（步驟）
 
-
-
 # Hugging Face Token 申請
 
 註冊或登入 Hugging Face：https://huggingface.co/join
@@ -29,7 +27,7 @@ import argparse, json, html, re
 from typing import Dict, List
 ```
 
-說明：
+## 說明：
 這裡匯入了程式需要用到的標準模組。
 
 argparse：用來處理命令列參數，例如輸出檔名、標題、副標。
@@ -42,7 +40,7 @@ re：正則表達式模組，用來做字串替換或模式比對。
 
 typing 中的 Dict、List：型別標註用，幫助程式可讀性，說明函式參數與回傳的資料結構。
 
-如果要改：
+## 如果要改：
 要增加新的外部功能，就在這裡多匯入需要的模組；要改正則或 JSON 格式相關的處理，也會跟這裡匯入的工具有關。
 
 # 後端：HTML 產出的小工具
@@ -52,7 +50,7 @@ def esc(s: str) -> str:
     return html.escape(str(s), quote=False)
 ```
 
-說明：
+## 說明：
 這個函式的目的是將輸入的文字做 HTML 字元轉義，避免被當成 HTML 標籤或導致 XSS。
 
 參數 s：傳入的任意資料，會先被轉成字串。
@@ -61,21 +59,21 @@ html.escape：將特殊字元轉換成 HTML 安全格式，例如 & 變成 &，<
 
 quote=False：代表不轉換單引號與雙引號。
 
-如果要改：
+## 如果要改：
 若想連引號也轉換，將 quote=False 改成 True。若想加入額外過濾，例如單引號變成 '，需要自己再加 replace。
 
 ```python
 def cls_safe(s: str) -> str:
 return re.sub(r"[^a-zA-Z0-9_-]+", "-", s)
 ```
-說明：
+## 說明：
 這個函式會把輸入的字串轉成安全可用於 CSS class 名稱的形式。
 
 使用正則表達式 re.sub，將所有不是字母、數字、底線、連字號的字元，通通換成一個連字號。
 
 例如輸入 "心臟病" 會變成 "---"，輸入 "B-DISEASE" 則保持不變。
 
-如果要改：
+## 如果要改：
 如果需要支援中文 class 名稱，可以在正則裡加入中文 Unicode 範圍，例如 \u4e00-\u9fff。
 ```python
 def build_palette(labels: List[str]):
@@ -90,7 +88,7 @@ css[f"I-{ent}"] = (f"hsl({hue},85%,96%)", f"hsl({hue},70%,55%)")
 css["O"] = ("transparent", "rgba(0,0,0,.18)")
 return css
 ```
-說明：
+## 說明：
 這個函式用來生成 BIO 標籤的配色方案。
 
 先把標籤去掉 B- 或 I- 前綴，只留下實體名稱，例如 DISEASE。
@@ -107,5 +105,5 @@ B- 開頭的標籤用較深顏色，I- 開頭的標籤用較淺顏色。
 
 O 類型設成透明背景和淡灰色虛線邊框。
 
-如果要改：
+## 如果要改：
 可以調整 HSL 裡面的亮度或飽和度，控制顏色深淺；或者對特定實體強制指定顏色，例如 "DISEASE" 永遠用紅色。
