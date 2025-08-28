@@ -18,11 +18,11 @@ Legend：一鍵全選/全不選、逐實體開關顯示。
 
 資料下載：介面可直接下載三種 JSONL：
 
-segments.jsonl：分句結果
+分句結果:segments.jsonl
 
-ner_token_rows.jsonl：分詞結果
+分詞結果:ner_token_rows.jsonl
 
-ner_labeled.jsonl：BIO 標註結果
+BIO 標註結果:ner_labeled.jsonl
 # 技術棧
 - Python 3.7+（僅使用標準函式庫：argparse、json、html、re、typing）
 - HTML5、CSS3、現代 JavaScript (ES6+)
