@@ -1596,9 +1596,11 @@ function downloadText(filename, text){
 const $  = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 ```
+
 這組工具用於在模組中選取 DOM 元素，兩者都是全域變數，為箭頭函式。輸入皆為 CSS 選擇器字串。
 
  `const $`:回傳第一個符合的 DOM 元素，用於簡化單一元素選取，避免重複撰寫 document.querySelector()。 
+ 
 `const $$`:回傳所有符合的 DOM 元素並轉成陣列，使用 Array.from() 使結果支援陣列方法，例如 .map()、.forEach() 等。
 
 
