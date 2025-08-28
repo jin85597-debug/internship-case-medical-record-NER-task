@@ -278,3 +278,37 @@ HTML_HEAD = """<!doctype html>
 改 sticky 高度：調整 .aside 的 top 值。
 
 改響應式斷點：修改 @media 的 max-width 數值。
+
+## 說明:
+```php-template
+/* 卡片 */
+.file-block{border:1px solid var(--line);border-radius:14px;margin:16px 0;background:#fff}
+.file-head{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.file-title{font-size:16px;font-weight:700}
+.file-sub{color:var(--muted);font-size:12px}
+.file-body{padding:8px 14px 14px 14px}
+```
+### 目的：建立每個檔案區塊的卡片樣式，包含標題列與內容區，提升視覺分隔與可讀性。
+
+`.file-block{border:1px solid var(--line);border-radius:14px;margin:16px 0;background:#fff}`：卡片容器，白底、圓角 14px、上下間距 16px，邊框使用全域線色。
+
+`.file-head{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}`：卡片標題列，左右排版，內距 12px 上下、16px 左右，底部加一條分隔線。
+
+`.file-title{font-size:16px;font-weight:700}`：主標題字級 16px，粗體。
+
+`.file-sub{color:var(--muted);font-size:12px}`：副標題字級 12px，使用 muted 色系。
+
+`.file-body{padding:8px 14px 14px 14px}`：卡片內容區，內距設定為上 8px、左右 14px、下 14px。
+
+### 如果要改：
+
+改圓角：調整 .file-block 的 border-radius。
+
+改背景色：修改 .file-block 的 background。
+
+改排版方式：可改 .file-head 的 display 為 grid 或 block。
+
+改字級：調整 .file-title 與 .file-sub 的 font-size。
+
+改間距：調整 .file-body 的 padding。
+
