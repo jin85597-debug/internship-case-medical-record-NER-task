@@ -1712,6 +1712,19 @@ function downloadText(filename, text){
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 ```
+基本下載工具，用於將文字內容轉換為檔案並觸發瀏覽器下載。常用於匯出 JSON、設定檔、使用者資料等純文字格式，不需伺服器支援即可完成本地儲存。
+
+`const blob = new Blob([text], {type:'application/json;charset=utf-8'})`:將輸入的文字內容包裝成 `Blob` 物件，指定 `MIME` 類型為 `application/json` 並設定編碼為 `UTF-8`。若內容非 JSON，可調整 `MIME` 類型為 `text/plain` 或其他格式。
+
+`const url = URL.createObjectURL(blob)`:建立一個指向 `Blob` 的暫時性 URL，供下載連結使用。此 URL 只在當前 session 有效，需手動釋放。
+
+`const a = document.createElement('a'`:建立一個 `<a>` 元素作為下載觸發器，不插入 DOM，僅用於程式觸發。
+
+`a.href = url; a.download = filename; a.click()`:設定下載連結與檔案名稱後，直接觸發點擊事件，啟動瀏覽器下載流程。
+
+`setTimeout(() => URL.revokeObjectURL(url), 1000)`:延遲 1 秒釋放暫時性 URL，避免記憶體洩漏。若下載檔案較大或瀏覽器反應慢，可視情況延長延遲時間。
+
+此函式不支援非文字型資料（如圖片、二進位檔），若需處理其他格式，需調整 `Blob` 類型與內容編碼方式。適用於前端匯出功能、離線儲存、使用者備份等場景。
 
 
 
