@@ -1599,9 +1599,9 @@ const $$ = s => Array.from(document.querySelectorAll(s));
 
 這組工具用於在模組中選取 DOM 元素，兩者都是全域變數，為箭頭函式。輸入皆為 CSS 選擇器字串。
 
- `const $`:回傳第一個符合的 DOM 元素，用於簡化單一元素選取，避免重複撰寫 document.querySelector()。 
+ `const $`:回傳第一個符合的 DOM 元素，用於簡化單一元素選取，避免重複撰寫 `document.querySelector()`。 
  
-`const $$`:回傳所有符合的 DOM 元素並轉成陣列，使用 Array.from() 使結果支援陣列方法，例如 .map()、.forEach() 等。
+`const $$`:回傳所有符合的 DOM 元素並轉成陣列，使用` Array.from()` 使結果支援陣列方法，例如` .map()`、`.forEach()` 等。
 
 
 ```php_template
@@ -1609,6 +1609,11 @@ function htmlEscape(s){
   return (s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 }
 ```
+基本字串處理工具，用於將輸入內容轉換為安全的 HTML 格式。主要用途是防止使用者輸入或外部資料破壞頁面結構或造成 `XSS` 漏洞。
+
+會將` &、<、>、"、' `等特殊符號轉換為對應的 HTML 寫法，確保插入 `innerHTML` 時不會被誤解為標籤或屬性。
+
+此函式不處理 `Unicode` 字元或 `emoji`，僅針對 HTML 結構敏感字元進行轉換。
 
  ```php_template
 function slug(s){
@@ -1617,12 +1622,59 @@ function slug(s){
     .replace(/^-|-$/g,'');                      
 }
 ```
+```php_template
+function slug(s){
+ return (s||'').toLowerCase()
+   .replace(/[^a-z0-9\\u4e00-\\u9fff_-]+/g,'-')
+   .replace(/^-|-$/g,'');                      
+}
+```
+基本字串處理工具，用於將輸入內容轉換為 URL 友善格式。
+
+`return s.toLowerCase()`:將整段字串轉為小寫，確保產生的` slug` 在大小寫上具有一致性。這是為了避免 URL 或檔名因大小寫不同而產生重複或錯誤。
+
+  `.replace(/[^\w\u4e00-\u9fff]+/g, '-')`:將所有非「英數字、底線、中文」的字元（包含空格、標點、特殊符號）替換為連字符 -。
+  
+ `\w`：代表 [A-Za-z0-9_]
+
+ `\u4e00-\u9fff`：代表 CJK 統一漢字（中文常用字）
+ 
+` +`：表示連續出現的符號會被一次性替換為一個
+
+`.replace(/^-|-$/g,'');`:將字串開頭的 - 或 結尾的 - 拿掉。
+
+/^-|-$/g = 「開頭的 - 或 結尾的 -」
+
+'' = 替換成空字串（等於刪掉）
+
+`^` : 字串開頭
+
+`$ `: 字串結尾
+
+`-` : 字元符號
+
+`|` : 用來表示OR (或)的意思
 
  ```php_template
 function natKey(s){
   return (s+'').split(/(\\d+)/).map(p => /^\\d+$/.test(p) ? Number(p) : p.toLowerCase());
 }
 ```
+基本字串處理工具，用於將輸入字串轉換為自然排序用的鍵值陣列。此函式會將字串中的數字與非數字段落分開，並依據內容轉為數字或小寫字串，供後續排序邏輯使用。
+
+`(s+'')`:將輸入值強制轉為字串，避免傳入數字或 null 時出錯。
+
+`.split(/(\d+)/)`:以數字區段為分隔點，將整段字串切成「文字段落」與「數字段落」交錯的陣列。
+
+`(\d+)`：代表一個或多個連續數字，括號表示保留分隔內容（即數字本身也會成為陣列元素）。
+
+`.map(p => /^\d+$/.test(p) ? Number(p) : p.toLowerCase())`:逐一處理分段內容，若為純數字則轉為數值型別，否則轉為小寫字串。
+
+`/^\d+$/`:正則表示式，用來判斷整段是否為純數字
+
+`Number(p)`:將數字字串轉為數值，確保排序時能以數值大小比較
+
+`p.toLowerCase()`:將非數字段落轉為小寫，確保文字排序一致性
 
  ```php_template
 const natCmp = (a, b) => {
@@ -1636,6 +1688,21 @@ const natCmp = (a, b) => {
   return 0;
 };
 ```
+基本排序工具，用於比較兩個字串的自然順序，避免一般字串排序將 'file10' 排在 'file2' 前的問題。搭配 `natKey()`將字串拆解為數字與文字段落後，逐段比較其大小，實現符合人類直覺的排序邏輯。
+
+`const ka = natKey(a), kb = natKey(b)`:將兩個輸入字串轉換為自然排序鍵值陣列。每個陣列元素可能是數字或小寫字串，供後續逐段比較使用。
+
+`for (let i = 0; i < Math.max(ka.length, kb.length); i++)`:以最長陣列長度為迴圈上限，確保能完整比較所有段落。若其中一方較短，會在比較過程中提早結束。
+
+`if (ka[i] == null) return -1`:若 a 的鍵值陣列在該段落為空，表示 a 長度較短，排序上應排在前面。
+
+`if (kb[i] == null) return 1`:若 b 的鍵值陣列在該段落為空，表示 b 長度較短，排序上應排在前面。
+
+`if (ka[i] < kb[i]) return -1`:若 a 的該段鍵值小於 b，則 a 排在前面。
+
+`if (ka[i] > kb[i]) return 1`:若 a 的該段鍵值大於 b，則 a 排在後面。
+
+`return 0`:若所有段落都相等，則視為兩者相等，回傳 0。
 
  ```php_template
 function downloadText(filename, text){
