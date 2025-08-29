@@ -1943,3 +1943,84 @@ st.textContent = css;
 
 `st.textContent = css;`:把前面累積的 CSS 字串 放進 <style> 裡，每次呼叫 dynBIO() 都會覆寫舊的，確保樣式更新。
 
+# Legend/TOC 區塊
+```php_template
+function renderLegend(){
+  const ents = Array.from(new Set(Array.from(LABELS)
+                  .filter(l=>l!=='O')
+                  .map(l=>l.replace(/^([BI]-)/,''))))
+                .sort();
+  $('#legend').innerHTML = ents.length
+    ? ents.map((ent, idx) => {
+        const hue = Math.floor(360 * idx / Math.max(1, ents.length));
+        return `<label class="chip">
+          <input type="checkbox" class="entToggle" data-ent="${htmlEscape(ent)}" checked/>
+          <span class="swatch" style="background:hsl(${hue},85%,90%);border-color:hsl(${hue},70%,35%)"></span>
+          <span>${htmlEscape(ent)}</span>
+        </label>`;
+      }).join("")
+    : '<span class="chip">No entities</span>';
+}
+function renderTOC(files){
+  const names = Object.keys(files).sort(natCmp);
+  $('#toc').innerHTML = names.map(f => `<a href="#file-${slug(f)}">${htmlEscape(f)}</a>`).join("");
+}
+function bindLegendToggles(){
+  function apply(){
+    const enabled = new Set($$('.entToggle').filter(t=>t.checked).map(t=>t.dataset.ent));
+    $$('.tok').forEach(el=>{
+      const ent = el.dataset.ent;
+      if (ent === 'O') return;
+      if (enabled.size === 0 || enabled.has(ent)) {
+        el.style.display = 'inline-block';
+        el.style.background = '';
+        el.style.border = '';
+      } else {
+        el.style.display = 'inline-block';
+        el.style.background = 'transparent';
+        el.style.border = 'none';
+      }
+    });
+  }
+  $$('.entToggle').forEach(t => t.onchange = apply);
+  $('#selAll')?.addEventListener('click',  () => { $$('.entToggle').forEach(t=>t.checked=true);  apply(); });
+  $('#selNone')?.addEventListener('click', () => { $$('.entToggle').forEach(t=>t.checked=false); apply(); });
+  apply();
+}
+```
+
+## 解釋
+`function renderLegend(){}`:產生右側的「Legend」區塊，列出所有實體清單，並附上顏色方塊與勾選框。
+
+```php_template
+const ents = Array.from(new Set(Array.from(LABELS)
+                .filter(l=>l!=='O')
+                .map(l=>l.replace(/^([BI]-)/,''))))
+              .sort();
+```
+`const ents = Array.from(new Set(Array.from(LABELS)`:把全域 LABELS（一個 Set）轉成陣列。
+
+`.filter(l => l !== 'O')`:移除 "O"，只留下帶實體的標籤，變成 `["B-Disease","I-Disease","B-Drug"]`。
+
+`.map(l => l.replace(/^([BI]-)/, ''))：用正則把 B- 或 I- 前綴移掉，只保留純實體名稱，變成`["Disease","Disease","Drug"]`。
+
+`new Set(...)`:包成一個集合，去除重複實體，變成`{"Disease","Drug"}`。
+
+`Array.from(...)`:把 Set 再轉回陣列，準備排序`["Disease","Drug"]`。
+
+`.sort()`:字典序排序，最終得到穩定、整齊的實體清單。
+
+```php_template
+  $('#legend').innerHTML = ents.length
+    ? ents.map((ent, idx) => {
+        const hue = Math.floor(360 * idx / Math.max(1, ents.length));
+        return `<label class="chip">
+          <input type="checkbox" class="entToggle" data-ent="${htmlEscape(ent)}" checked/>
+          <span class="swatch" style="background:hsl(${hue},85%,90%);border-color:hsl(${hue},70%,35%)"></span>
+          <span>${htmlEscape(ent)}</span>
+        </label>`;
+      }).join("")
+    : '<span class="chip">No entities</span>';
+}
+```
+
