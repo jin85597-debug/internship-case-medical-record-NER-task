@@ -1726,6 +1726,38 @@ function downloadText(filename, text){
 
 此函式不支援非文字型資料（如圖片、二進位檔），若需處理其他格式，需調整 `Blob` 類型與內容編碼方式。適用於前端匯出功能、離線儲存、使用者備份等場景。
 
+# 全域狀態與 BIO 樣式區塊
+ ```php_template
 
+let DATA = {};
+let LABELS = new Set();
+
+const PREFERRED_SECTIONS = [
+  "診斷","主訴","過去病史","住院治療經過",
+  "Diagnosis","Impression","Chief_Complaint","Chief Complaint",
+  "Past_History","Past History","Hospital_Course","Hospital Course"
+];
+
+function dynBIO(){
+  const ents = Array.from(new Set(Array.from(LABELS)
+                  .filter(l=>l!=='O')
+                  .map(l=>l.replace(/^([BI]-)/,''))))
+                .sort();
+  const total = Math.max(1, ents.length);
+  let css = "";
+  ents.forEach((ent,i)=>{
+    const hue = Math.floor(360*i/total);
+    const bbg = `hsl(${hue},85%,90%)`, bbd=`hsl(${hue},70%,35%)`;
+    const ibg = `hsl(${hue},85%,96%)`, ibd=`hsl(${hue},70%,55%)`;
+    const safe = ent.replace(/[^\w-]/g,'-');
+    css += `.lab-B-${safe}{background:${bbg};border:1px solid ${bbd};border-left:3px solid ${bbd};}`;
+    css += `.lab-I-${safe}{background:${ibg};border:1px solid ${ibd};border-left:1px solid ${ibd};}`;
+  });
+  css += `.tok.O{opacity:.85;border:1px dashed rgba(0,0,0,.18)}`;
+  let st = document.getElementById('dyn-label-css');
+  if(!st){ st=document.createElement('style'); st.id='dyn-label-css'; document.head.appendChild(st); }
+  st.textContent = css;
+}
+```
 
 
