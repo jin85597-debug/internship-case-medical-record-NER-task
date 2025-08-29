@@ -1801,6 +1801,33 @@ const PREFERRED_SECTIONS = [
 若不確定是否適合加入，請確認該章節是否屬於診斷、主訴、病史、病程等類型
 
 # 動態BIO區塊
+```php_template
+function dynBIO(){
+  const ents = Array.from(new Set(Array.from(LABELS)
+                  .filter(l=>l!=='O')
+                  .map(l=>l.replace(/^([BI]-)/,''))))
+                .sort();
+ const total = Math.max(1, ents.length);
+
+ let css = "";
+  ents.forEach((ent,i)=>{
+    const hue = Math.floor(360*i/total);
+const bbg = `hsl(${hue},85%,90%)`, bbd=`hsl(${hue},70%,35%)`;
+const ibg = `hsl(${hue},85%,96%)`, ibd=`hsl(${hue},70%,55%)`;
+const safe = ent.replace(/[^\w-]/g,'-');
+css += `.lab-B-${safe}{background:${bbg};border:1px solid ${bbd};border-left:3px solid ${bbd};}`;
+css += `.lab-I-${safe}{background:${ibg};border:1px solid ${ibd};border-left:1px solid ${ibd};}`;
+css += `.tok.O{opacity:.85;border:1px dashed rgba(0,0,0,.18)}`;
+
+let st = document.getElementById('dyn-label-css');
+if(!st){ 
+  st = document.createElement('style'); 
+  st.id = 'dyn-label-css'; 
+  document.head.appendChild(st); 
+}
+st.textContent = css;
+```
+
 ## 解釋 
 ```php_template
 function dynBIO(){
@@ -1859,12 +1886,14 @@ ibg → I- 標籤的背景色，飽和度 85%，亮度 96%
 
 ibd → I- 標籤的邊框色，飽和度 70%，亮度 55%
 
-`const safe = ent.replace(/[^\w-]/g,'-')`:把實體名稱裡不合法的字元（非英數字、底線、連字號）轉成 -，確保能安全用在 CSS 類名。
+const safe = ent.replace(/[^\w-]/g,'-')
 
 ```php_template
+const safe = ent.replace(/[^\w-]/g,'-');
 css += `.lab-B-${safe}{background:${bbg};border:1px solid ${bbd};border-left:3px solid ${bbd};}`;
 css += `.lab-I-${safe}{background:${ibg};border:1px solid ${ibd};border-left:1px solid ${ibd};}`;
 ```
+`const safe = ent.replace(/[^\w-]/g,'-')`:把實體名稱裡不合法的字元（非英數字、底線、連字號）轉成 -，確保能安全用在 CSS 類名。
 
 `.lab-B-${safe}`:套用 B- 標籤的樣式。
 
