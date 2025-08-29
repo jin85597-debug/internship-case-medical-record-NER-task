@@ -1726,38 +1726,44 @@ function downloadText(filename, text){
 
 此函式不支援非文字型資料（如圖片、二進位檔），若需處理其他格式，需調整 `Blob` 類型與內容編碼方式。適用於前端匯出功能、離線儲存、使用者備份等場景。
 
-# 全域狀態與 BIO 樣式區塊
- ```php_template
-
+# 全域狀態區塊
+```php_template
+/* ====== 全域狀態 ====== */
 let DATA = {};
 let LABELS = new Set();
-
-const PREFERRED_SECTIONS = [
-  "診斷","主訴","過去病史","住院治療經過",
-  "Diagnosis","Impression","Chief_Complaint","Chief Complaint",
-  "Past_History","Past History","Hospital_Course","Hospital Course"
-];
-
-function dynBIO(){
-  const ents = Array.from(new Set(Array.from(LABELS)
-                  .filter(l=>l!=='O')
-                  .map(l=>l.replace(/^([BI]-)/,''))))
-                .sort();
-  const total = Math.max(1, ents.length);
-  let css = "";
-  ents.forEach((ent,i)=>{
-    const hue = Math.floor(360*i/total);
-    const bbg = `hsl(${hue},85%,90%)`, bbd=`hsl(${hue},70%,35%)`;
-    const ibg = `hsl(${hue},85%,96%)`, ibd=`hsl(${hue},70%,55%)`;
-    const safe = ent.replace(/[^\w-]/g,'-');
-    css += `.lab-B-${safe}{background:${bbg};border:1px solid ${bbd};border-left:3px solid ${bbd};}`;
-    css += `.lab-I-${safe}{background:${ibg};border:1px solid ${ibd};border-left:1px solid ${ibd};}`;
-  });
-  css += `.tok.O{opacity:.85;border:1px dashed rgba(0,0,0,.18)}`;
-  let st = document.getElementById('dyn-label-css');
-  if(!st){ st=document.createElement('style'); st.id='dyn-label-css'; document.head.appendChild(st); }
-  st.textContent = css;
-}
 ```
+## 解釋
+```php_template
+let DATA = {};
+```
+全域資料儲存物件，用於記錄每個檔案的章節內容與標記結果。
 
+後續程式會依照結構 `DATA[file][section][sidx] = [TokenRow...]` 逐步填入內容。此物件不具備預設格式，需由前處理邏輯主動建立各層級。
 
+### 注意事項：
+- 每層 `key（file、section、sidx` 皆為字串或數字，避免 `undefined` 或 `null`
+- 
+- 每個 `[TokenRow...]` 陣列結構一致，欄位明確
+- 
+- 不同檔案之間的章節命名需 `normalize`，避免重複或排序錯誤
+
+```php_template
+let LABELS = new Set();
+```
+BIO 標籤集合，包含所有出現過的 BIO 標記。
+
+此集合由標記流程動態累積，主要用途為：
+
+- 提供 `dynBIO()` 使用，推導每個實體的 CSS 類名與色票
+  
+- 作為標籤統計依據，可用於分析模型輸出或人工標記分佈
+  
+- 驗證標籤合法性，避免混入非 BIO 格式（如空字串或錯誤前綴）
+  
+### 注意事項：
+
+- 所有標籤應符合 `B-XXX / I-XXX / O` 格式
+  
+- 若需重設標籤集合，可使用 `LABELS.clear()`
+  
+- 若需排序或分類標籤，應先轉為陣列再處理（例如 `Array.from(LABELS)`）
