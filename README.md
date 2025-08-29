@@ -1787,13 +1787,8 @@ const PREFERRED_SECTIONS = [
 當系統讀入一份病歷，裡面有多個章節，就會依照這個清單的順序，去找出最重要的章節來處理。如果資料中沒有出現清單裡的章節名稱，就會退回原始順序。
 
 目前清單包含以下章節名稱：
-[
-  "診斷","主訴","過去病史","住院治療經過",
-  
-  "Diagnosis","Impression","Chief_Complaint","Chief Complaint",
-  
-  "Past_History","Past History","Hospital_Course","Hospital Course"
-]
+
+["診斷","主訴","過去病史","住院治療經過","Diagnosis","Impression","Chief_Complaint","Chief Complaint","Past_History","Past History","Hospital_Course","Hospital Course"]
 
 這些字串涵蓋中英文版本，並同時支援底線與空格格式，是為了兼容不同資料來源的章節命名方式。語意上可分為診斷、主訴、病史、住院病程四大類。
 
