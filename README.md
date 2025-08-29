@@ -1733,6 +1733,7 @@ let DATA = {};
 let LABELS = new Set();
 ```
 ## 解釋
+
 ```php_template
 let DATA = {};
 ```
@@ -1741,6 +1742,7 @@ let DATA = {};
 後續程式會依照結構 `DATA[file][section][sidx] = [TokenRow...]` 逐步填入內容。此物件不具備預設格式，需由前處理邏輯主動建立各層級。
 
 ### 注意事項：
+
 - 每層 `key（file、section、sidx` 皆為字串或數字，避免 `undefined` 或 `null`
 - 
 - 每個 `[TokenRow...]` 陣列結構一致，欄位明確
