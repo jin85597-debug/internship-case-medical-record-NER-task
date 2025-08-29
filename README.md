@@ -1769,3 +1769,44 @@ BIO 標籤集合，包含所有出現過的 BIO 標記。
 - 若需重設標籤集合，可使用 `LABELS.clear()`
   
 - 若需排序或分類標籤，應先轉為陣列再處理（例如 `Array.from(LABELS)`）
+
+
+# 全域狀態區塊
+
+```php_template
+const PREFERRED_SECTIONS = [
+  "診斷","主訴","過去病史","住院治療經過",
+  "Diagnosis","Impression","Chief_Complaint","Chief Complaint",
+  "Past_History","Past History","Hospital_Course","Hospital Course"
+];
+```
+
+## 解釋
+常見章節優先排序，用來定義在處理病歷資料時，哪些章節應該被優先挑出來處理、標記或顯示。
+
+當系統讀入一份病歷，裡面有多個章節，就會依照這個清單的順序，去找出最重要的章節來處理。如果資料中沒有出現清單裡的章節名稱，就會退回原始順序。
+
+目前清單包含以下章節名稱：[
+
+  "診斷","主訴","過去病史","住院治療經過",
+  
+  "Diagnosis","Impression","Chief_Complaint","Chief Complaint",
+  
+  "Past_History","Past History","Hospital_Course","Hospital Course"
+
+]
+這些字串涵蓋中英文版本，並同時支援底線與空格格式，是為了兼容不同資料來源的章節命名方式。語意上可分為診斷、主訴、病史、住院病程四大類。
+
+### 若要修改這個清單，請遵守以下原則：
+
+新增字串必須是實際章節名稱，不能是文件標題或模糊詞（例如`record`、`Note`）
+
+建議同時加入底線與空格版本，例如 `"A_B"`與`"A  B"` 
+
+新增項目應插入適當位置，維持語意排序穩定性，例如病程類章節應放在 `"Hospital Course"` 之後
+
+清單比對為大小寫敏感，來源若為`"diagnosis"`則需 `normalize` 或加入對應版本
+
+清單不應包含空字串、null 或重複項目，否則排序邏輯可能失效
+
+若不確定是否適合加入，請確認該章節是否屬於診斷、主訴、病史、病程等類型
