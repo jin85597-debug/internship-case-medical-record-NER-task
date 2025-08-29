@@ -1622,13 +1622,7 @@ function slug(s){
     .replace(/^-|-$/g,'');                      
 }
 ```
-```php_template
-function slug(s){
- return (s||'').toLowerCase()
-   .replace(/[^a-z0-9\\u4e00-\\u9fff_-]+/g,'-')
-   .replace(/^-|-$/g,'');                      
-}
-```
+
 基本字串處理工具，用於將輸入內容轉換為 URL 友善格式。
 
 `return s.toLowerCase()`:將整段字串轉為小寫，確保產生的` slug` 在大小寫上具有一致性。這是為了避免 URL 或檔名因大小寫不同而產生重複或錯誤。
@@ -1771,7 +1765,7 @@ BIO 標籤集合，包含所有出現過的 BIO 標記。
 - 若需排序或分類標籤，應先轉為陣列再處理（例如 `Array.from(LABELS)`）
 
 
-# 全域狀態區塊
+# 優先排序區塊
 
 ```php_template
 const PREFERRED_SECTIONS = [
@@ -1782,7 +1776,7 @@ const PREFERRED_SECTIONS = [
 ```
 
 ## 解釋
-常見章節優先排序，用來定義在處理病歷資料時，哪些章節應該被優先挑出來處理、標記或顯示。
+將常見章節優先排序，用來定義在處理病歷資料時，哪些章節應該被優先挑出來處理、標記或顯示。
 
 當系統讀入一份病歷，裡面有多個章節，就會依照這個清單的順序，去找出最重要的章節來處理。如果資料中沒有出現清單裡的章節名稱，就會退回原始順序。
 
@@ -1805,3 +1799,120 @@ const PREFERRED_SECTIONS = [
 清單不應包含空字串、null 或重複項目，否則排序邏輯可能失效
 
 若不確定是否適合加入，請確認該章節是否屬於診斷、主訴、病史、病程等類型
+
+# 動態BIO區塊
+## 解釋 
+```php_template
+function dynBIO(){
+  const ents = Array.from(new Set(Array.from(LABELS)
+                  .filter(l=>l!=='O')
+                  .map(l=>l.replace(/^([BI]-)/,''))))
+                .sort();
+```               
+這是一個無參數函式，輸入來源為全域變數 LABELS（一個 Set，包含目前所有標籤字串）。
+
+`Array.from(...)`：轉成陣列，方便後續操作。
+
+`new Set(...)`：去重，確保實體名唯一。
+
+`.filter(l=>l!=='O')`：移除標籤 O。
+
+`.map(l=>l.replace(/^([BI]-)/,''))`：把 B- 或 I- 前綴移掉，只保留實體名稱。
+
+`.sort()`：排序，得到整齊的實體名陣列 ents。
+
+```php_template
+ const total = Math.max(1, ents.length);
+```
+
+`Math.max(1, ents.length)`：設定為 1，避免後面計算色相時除以 0。
+
+`ents.length`：表示NER實體的數量。
+
+```php_template
+ let css = "";
+  ents.forEach((ent,i)=>{
+    const hue = Math.floor(360*i/total);
+  ```
+
+`let css = ""`:建立一個空字串，後面會把所有的 CSS 規則累積進來。
+
+`ents.forEach((ent,i)=>{ ... })`:逐一處理每個實體名稱 ent，i 是它的索引。
+
+`const hue = Math.floor(360*i/total);`:把色相環 (0–360 度) 平均分配給所有實體，確保每個實體顏色不同。
+
+```php_template
+const bbg = `hsl(${hue},85%,90%)`, bbd=`hsl(${hue},70%,35%)`;
+const ibg = `hsl(${hue},85%,96%)`, ibd=`hsl(${hue},70%,55%)`;
+ ```
+hsl：色彩模型（Hue 色相 / Saturation 飽和度 / Lightness 亮度）
+
+hue：色相，由程式計算得出（Math.floor(360*i/total)）
+
+具體參數：
+
+bbg → B- 標籤的背景色，飽和度 85%，亮度 90%
+
+bbd → B- 標籤的邊框色，飽和度 70%，亮度 35%
+
+ibg → I- 標籤的背景色，飽和度 85%，亮度 96%
+
+ibd → I- 標籤的邊框色，飽和度 70%，亮度 55%
+
+`const safe = ent.replace(/[^\w-]/g,'-')`:把實體名稱裡不合法的字元（非英數字、底線、連字號）轉成 -，確保能安全用在 CSS 類名。
+
+```php_template
+css += `.lab-B-${safe}{background:${bbg};border:1px solid ${bbd};border-left:3px solid ${bbd};}`;
+css += `.lab-I-${safe}{background:${ibg};border:1px solid ${ibd};border-left:1px solid ${ibd};}`;
+```
+
+`.lab-B-${safe}`:套用 B- 標籤的樣式。
+
+`background:${bbg}`: 背景色，飽和度 85%，亮度 90%。
+
+`border:1px solid ${bbd}`: 邊框色，飽和度 70%，亮度 35%。
+
+`border-left:3px solid ${bbd}`: 左邊框加粗 3px，強調起始。
+
+
+`.lab-I-${safe}`:套用 I- 標籤的樣式。
+
+`background:${ibg} `:背景色，飽和度 85%，亮度 96%。
+
+`border:1px solid ${ibd}`:邊框色，飽和度 70%，亮度 55%。
+
+`border-left:1px solid ${ibd}`:左邊框細線 1px，表示延續。
+
+```php_template
+css += `.tok.O{opacity:.85;border:1px dashed rgba(0,0,0,.18)}`;
+```
+`.tok.O`：指定 O 標籤（非實體）的樣式。
+
+`opacity:.85`：透明度設為 0.85，讓它看起來比實體淡。
+
+`border:1px dashed rgba(0,0,0,.18)`：邊框寬度 1px，邊框樣式 dashed（虛線），邊框顏色 rgba(0,0,0,.18) → 黑色，透明度 18%。
+
+```php_template
+let st = document.getElementById('dyn-label-css');
+if(!st){ 
+  st = document.createElement('style'); 
+  st.id = 'dyn-label-css'; 
+  document.head.appendChild(st); 
+}
+st.textContent = css;
+```
+
+建立或覆寫一個動態 <style> 標籤，把產生好的 BIO 樣式（css）注入頁面，讓顏色與邊框即時更新。
+
+`let st = document.getElementById('dyn-label-css');`:嘗試取得 `<style id="dyn-label-css">` 標籤，如果頁面已經有，就直接拿來覆寫。
+
+`if(!st){ ... }`:如果不存在，新建一個 <style>。
+
+`document.createElement('style')`：建立 <style> 節點。
+
+`st.id = 'dyn-label-css'`：設定 id，方便下次再找到。
+
+`document.head.appendChild(st)`：插入到 <head>，讓 CSS 生效。
+
+`st.textContent = css;`:把前面累積的 CSS 字串 放進 <style> 裡，每次呼叫 dynBIO() 都會覆寫舊的，確保樣式更新。
+
