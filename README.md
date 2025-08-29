@@ -1886,8 +1886,6 @@ ibg → I- 標籤的背景色，飽和度 85%，亮度 96%
 
 ibd → I- 標籤的邊框色，飽和度 70%，亮度 55%
 
-const safe = ent.replace(/[^\w-]/g,'-')
-
 ```php_template
 const safe = ent.replace(/[^\w-]/g,'-');
 css += `.lab-B-${safe}{background:${bbg};border:1px solid ${bbd};border-left:3px solid ${bbd};}`;
