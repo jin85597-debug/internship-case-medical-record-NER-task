@@ -1793,8 +1793,8 @@ const PREFERRED_SECTIONS = [
   "Diagnosis","Impression","Chief_Complaint","Chief Complaint",
   
   "Past_History","Past History","Hospital_Course","Hospital Course"
-
 ]
+
 這些字串涵蓋中英文版本，並同時支援底線與空格格式，是為了兼容不同資料來源的章節命名方式。語意上可分為診斷、主訴、病史、住院病程四大類。
 
 ### 若要修改這個清單，請遵守以下原則：
